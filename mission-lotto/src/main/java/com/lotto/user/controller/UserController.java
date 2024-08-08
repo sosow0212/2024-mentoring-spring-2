@@ -1,7 +1,7 @@
-package com.User.controller;
+package com.lotto.user.controller;
 
-import com.User.controller.dto.CreateUserRequest;
-import com.User.service.UserService;
+import com.lotto.user.controller.dto.CreateUserRequest;
+import com.lotto.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

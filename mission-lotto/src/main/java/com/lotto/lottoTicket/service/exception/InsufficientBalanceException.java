@@ -1,4 +1,4 @@
-package com.lotto.service.exception;
+package com.lotto.lottoTicket.service.exception;
 
 public class InsufficientBalanceException extends IllegalStateException{
 

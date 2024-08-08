@@ -1,4 +1,4 @@
-package com.lotto.infrastructure.vo.exception;
+package com.lotto.lottoTicket.infrastructure.vo.exception;
 
 public class BoundaryLottoNumberValueException extends RuntimeException{
     public BoundaryLottoNumberValueException() {

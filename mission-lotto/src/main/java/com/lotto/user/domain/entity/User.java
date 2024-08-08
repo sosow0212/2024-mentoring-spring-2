@@ -1,4 +1,4 @@
-package com.User.domain.entity;
+package com.lotto.user.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

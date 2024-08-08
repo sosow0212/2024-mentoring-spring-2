@@ -1,9 +1,9 @@
-package com.User.service;
+package com.lotto.user.service;
 
-import com.User.controller.dto.CreateUserRequest;
-import com.User.domain.entity.User;
-import com.User.domain.repository.UserRepository;
-import com.User.service.exception.NegativeAmountException;
+import com.lotto.user.controller.dto.CreateUserRequest;
+import com.lotto.user.domain.entity.User;
+import com.lotto.user.domain.repository.UserRepository;
+import com.lotto.user.service.exception.NegativeAmountException;
 import org.springframework.stereotype.Service;
 
 @Service

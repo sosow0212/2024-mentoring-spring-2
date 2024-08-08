@@ -1,4 +1,4 @@
-package com.lotto.infrastructure.vo;
+package com.lotto.lottoTicket.infrastructure.vo;
 
 import lombok.Getter;
 

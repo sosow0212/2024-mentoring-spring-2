@@ -1,4 +1,4 @@
-package com.User.service.exception;
+package com.lotto.user.service.exception;
 
 public class NegativeAmountException extends IllegalArgumentException{
     public NegativeAmountException() {
