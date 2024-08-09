@@ -1,9 +1,12 @@
 package com.lotto.user.service;
 
 import com.lotto.user.controller.dto.CreateUserRequest;
+
 import com.lotto.user.domain.entity.User;
 import com.lotto.user.domain.repository.UserRepository;
+
 import com.lotto.user.service.exception.NegativeAmountException;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +23,8 @@ public class UserService {
         User user = User
                 .builder()
                 .userName(request.userName())
+                .lottoCount(0)
+                .winning(0)
                 .balance(request.balance())
                 .build();
         userRepository.save(user);
@@ -31,7 +36,7 @@ public class UserService {
         }
     }
 
-
+}
 //
 //    public User getUserById(Long userId) {
 //        return userRepository
@@ -46,4 +51,4 @@ public class UserService {
 //    public void updateUserBalance(Long userId, int ticketCount) {
 //
 //    }
-}
+

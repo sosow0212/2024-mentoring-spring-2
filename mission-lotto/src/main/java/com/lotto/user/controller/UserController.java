@@ -2,6 +2,7 @@ package com.lotto.user.controller;
 
 import com.lotto.user.controller.dto.CreateUserRequest;
 import com.lotto.user.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,13 +20,12 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createUser(@RequestBody CreateUserRequest response) {
-        userService.createUser(response);
+    public ResponseEntity<Void> registerUser(@RequestBody CreateUserRequest request) {
+        userService.createUser(request);
         return ResponseEntity
-                .ok()
+                .status(HttpStatus.CREATED)
                 .build();
     }
-
 
 
 
