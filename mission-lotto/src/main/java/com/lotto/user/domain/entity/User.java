@@ -23,16 +23,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "유저 이름")
+    @Column(name = "userName")
     private String userName;
 
-    @Column(name = "보유 금액")
+    @Column(name = "balance")
     private int balance;
 
-    @Column(name = "로또 개수")
+    @Column(name = "lottoCount")
     private int lottoCount;
 
-    @Column(name = "당첨금")
+    @Column(name = "winningsMoney")
     private int winning;
 
 }

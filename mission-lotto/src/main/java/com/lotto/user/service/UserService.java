@@ -1,13 +1,15 @@
 package com.lotto.user.service;
 
-import com.lotto.user.controller.dto.CreateUserRequest;
-
+import com.lotto.user.controller.dto.CreateUserResponse;
 import com.lotto.user.domain.entity.User;
 import com.lotto.user.domain.repository.UserRepository;
 
 import com.lotto.user.service.exception.NegativeAmountException;
 
+import com.lotto.user.service.exception.NotFoundUserException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -18,16 +20,35 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void createUser(CreateUserRequest request) {
-        validateBalanceException(request.balance());
+    public CreateUserResponse registerUser(String userName, int balance) {
+        validateBalanceException(balance);
         User user = User
                 .builder()
-                .userName(request.userName())
+                .userName(userName)
                 .lottoCount(0)
                 .winning(0)
-                .balance(request.balance())
+                .balance(balance)
                 .build();
-        userRepository.save(user);
+
+        User savedUser =userRepository.save(user);
+
+        return new CreateUserResponse(
+                savedUser.getUserId(),
+                savedUser.getUserName(),
+                savedUser.getBalance(),
+                savedUser.getLottoCount(),
+                savedUser.getWinning()
+        );
+    }
+
+    public User getUserById(Long userId) {
+        return userRepository
+                .findById(userId)
+                .orElseThrow(NotFoundUserException::new);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     private static void validateBalanceException(final int balance) {
@@ -35,20 +56,4 @@ public class UserService {
             throw new NegativeAmountException();
         }
     }
-
 }
-//
-//    public User getUserById(Long userId) {
-//        return userRepository
-//                .findById(userId)
-//                .orElseThrow(NotFoundUserException::new);
-//    }
-//
-//    public User getAllUsers() {
-//
-//    }
-//
-//    public void updateUserBalance(Long userId, int ticketCount) {
-//
-//    }
-
