@@ -1,12 +1,15 @@
-package com.lotto.user.domain.entity;
+package com.lotto.lottoTicket.domain.entity;
 
-import com.lotto.lottoTicket.domain.entity.Lotto;
+import com.lotto.user.domain.entity.User;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,26 +23,19 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "Lottos")
+public class Lotto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "userName")
-    private String userName;
+    @Column(name = "LottoTicket")
+    @ElementCollection
+    private List<Integer> LottoTicket;
 
-    @Column(name = "balance")
-    private int balance;
-
-    @Column(name = "lottoCount")
-    private int lottoCount;
-
-    @Column
-    private int winning;
-
-    @OneToMany(mappedBy = "user")
-    private List<Lotto> lottoList;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }

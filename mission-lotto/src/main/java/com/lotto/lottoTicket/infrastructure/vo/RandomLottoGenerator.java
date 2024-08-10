@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 @Component
-public class RandomNumberGenerator implements NumberGenerator {
+public class RandomLottoGenerator implements LottoGenerator {
 
     private static final int LOTTO_SIZE = 6;
     private static final int LOTTO_BOUNDARY_NUMBER = 45;

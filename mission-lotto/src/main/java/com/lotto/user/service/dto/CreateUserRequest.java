@@ -1,4 +1,5 @@
 package com.lotto.user.service.dto;
 
-public record CreateUserRequest(String userName, int balance) {
+public record CreateUserRequest(Long userId, String userName, int balance, int lottoCount) {
+
 }
