@@ -49,8 +49,7 @@ public class LottoController {
     public ResponseEntity<UserResultResponse> getTargetLottoResult(@PathVariable(name = "lottoId") Long lottoId, @RequestParam(name = "winNumbers") List<Integer> winNumbers) {
         UserLotto userLotto = lottoService.getTargetLottoResult(lottoId);
         LottoJudge judge = lottoService.createLottoJudge(userLotto, winNumbers);
-        boolean isWinning = judge.isWinningLotto();
-        UserResultResponse response = new UserResultResponse(judge.getLottoNumbers(), isWinning);
+        UserResultResponse response = UserResultResponse.fromLottoJudge(judge);
         return ResponseEntity.ok(response);
     }
 

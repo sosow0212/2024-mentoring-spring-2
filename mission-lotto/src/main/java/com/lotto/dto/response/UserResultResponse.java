@@ -2,6 +2,7 @@ package com.lotto.dto.response;
 
 
 import com.lotto.domain.Lotto;
+import com.lotto.domain.LottoJudge;
 import com.lotto.domain.LottoRank;
 import com.lotto.domain.LottoResult;
 
@@ -18,6 +19,13 @@ public record UserResultResponse(
                         isWinningLotto(lotto.getLottoNumbers(), winNumbers)
                 ))
                 .toList();
+    }
+
+    public static UserResultResponse fromLottoJudge(LottoJudge judge) {
+        return new UserResultResponse(
+                judge.getLottoNumbers(),
+                judge.isWinningLotto()
+        );
     }
 
     private static boolean isWinningLotto(List<Integer> lottoNumbers, List<Integer> winNumbers) {
