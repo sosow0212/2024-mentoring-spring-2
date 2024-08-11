@@ -99,7 +99,9 @@ public class LottoService {
     }
 
     public List<Lotto> getLottoTicketsByUser(Long userId) {
-        return lottoRepository.findAll().stream()
+        return lottoRepository
+                .findAll()
+                .stream()
                 .filter(lotto -> lotto.getUser().getUserId().equals(userId))
                 .collect(Collectors.toList());
     }
