@@ -1,19 +1,19 @@
 package com.lotto.lottoTicket.infrastructure.vo;
 
-import org.springframework.stereotype.Component;
+import jakarta.persistence.Embeddable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Component
+@Getter
+@NoArgsConstructor
+@Embeddable
 public class LottoTicket {
 
-    private final RandomLottoGenerator randomLottoGenerator;
+    private List<Integer> numbers;
 
-    public LottoTicket(final RandomLottoGenerator randomLottoGenerator) {
-        this.randomLottoGenerator = randomLottoGenerator;
-    }
-
-    public List<Integer> createLotto(final RandomLottoGenerator randomLottoGenerator) {
-        return randomLottoGenerator.createLotto();
+    public LottoTicket(List<Integer> numbers) {
+        this.numbers = numbers;
     }
 }

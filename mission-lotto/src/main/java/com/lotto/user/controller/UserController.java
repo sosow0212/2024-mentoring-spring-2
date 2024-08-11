@@ -1,13 +1,10 @@
 package com.lotto.user.controller;
 
 import com.lotto.user.domain.entity.User;
-
 import com.lotto.user.service.UserService;
+import com.lotto.user.controller.dto.CreateUserResponse;
 import com.lotto.user.service.dto.CreateUserRequest;
 
-import com.lotto.user.controller.dto.CreateUserResponse;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,39 +27,31 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateUserRequest> registerUser(@RequestBody CreateUserResponse request) {
-        CreateUserRequest response = userService.registerUser(request.userName(), request.balance());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+    public ResponseEntity<CreateUserResponse> registerUser(@RequestBody CreateUserRequest request) {
+        User user = userService.registerUser(request.userName(), request.balance());
+        CreateUserResponse response = new CreateUserResponse(
+                user.getUserId(), user.getUserName(), user.getBalance(), user.getLottoCount());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CreateUserRequest> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<CreateUserResponse> getUserById(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
-        CreateUserRequest response = new CreateUserRequest(
-                user.getUserId(),
-                user.getUserName(),
-                user.getBalance(),
-                user.getLottoCount()
-        );
+        CreateUserResponse response = new CreateUserResponse(
+                user.getUserId(), user.getUserName(), user.getBalance(), user.getLottoCount());
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/allUsers")
-    public ResponseEntity<List<CreateUserRequest>> getAllUsers() {
+    public ResponseEntity<List<CreateUserResponse>> getAllUsers() {
         List<User> users = userService.getAllUsers();
-        List<CreateUserRequest> response = users
-                .stream()
-                .map(user -> new CreateUserRequest(
+        List<CreateUserResponse> response = users.stream()
+                .map(user -> new CreateUserResponse(
                         user.getUserId(),
                         user.getUserName(),
                         user.getBalance(),
-                        user.getLottoCount()
-                ))
+                        user.getLottoCount()))
                 .toList();
         return ResponseEntity.ok(response);
     }
-
 }

@@ -1,16 +1,9 @@
 package com.lotto.lottoTicket.domain.entity;
 
+import com.lotto.lottoTicket.infrastructure.vo.LottoTicket;
 import com.lotto.user.domain.entity.User;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,13 +21,13 @@ public class Lotto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
-    @Column(name = "LottoTicket")
     @ElementCollection
-    private List<Integer> LottoTicket;
+    @CollectionTable(name = "lotto_tickets", joinColumns = @JoinColumn(name = "lotto_id"))
+    private List<LottoTicket> lottoTickets;
 
-    @ManyToOne
+    @ManyToOne(fetch =FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

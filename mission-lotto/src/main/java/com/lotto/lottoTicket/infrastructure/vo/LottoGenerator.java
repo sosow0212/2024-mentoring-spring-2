@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface LottoGenerator {
 
-    List<Integer> createLotto();
+    List<Integer> generateRandomNumber();
 
 }

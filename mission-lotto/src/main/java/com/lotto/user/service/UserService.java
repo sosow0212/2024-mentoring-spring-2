@@ -1,13 +1,11 @@
 package com.lotto.user.service;
 
-import com.lotto.user.service.dto.CreateUserRequest;
 import com.lotto.user.domain.entity.User;
 import com.lotto.user.domain.repository.UserRepository;
 
 import com.lotto.user.service.exception.NegativeAmountException;
-
 import com.lotto.user.service.exception.NotFoundUserException;
-import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,37 +19,15 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public CreateUserRequest registerUser(String userName, int balance) {
+    public User registerUser(String userName, int balance) {
         validateBalanceException(balance);
-        User user = User
-                .builder()
+        User user = User.builder()
                 .userName(userName)
                 .lottoCount(0)
                 .winning(0)
                 .balance(balance)
                 .build();
-
-        User savedUser =userRepository.save(user);
-
-        return new CreateUserRequest(
-                savedUser.getUserId(),
-                savedUser.getUserName(),
-                savedUser.getBalance(),
-                savedUser.getLottoCount()
-        );
-    }
-
-    public void buyLotto(Long userId, int ticketCount){
-        User user =findUser(userId);
-
-
-    }
-
-    @Transactional()
-    public User findUser(Long userId) {
-        return userRepository
-                .findById(userId)
-                .orElseThrow(NotFoundUserException::new);
+        return userRepository.save(user);
     }
 
     public User getUserById(Long userId) {
