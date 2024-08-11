@@ -14,6 +14,10 @@ public class Lotto {
         return new Lotto(randomNumber.createRandomNumber());
     }
 
+    public static Lotto of(List<Integer> lottoNumbers) {
+        return new Lotto(lottoNumbers);
+    }
+
     public List<Integer> getLottoNumbers() {
         return lottoNumbers;
     }

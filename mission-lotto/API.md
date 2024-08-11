@@ -1,6 +1,6 @@
 ### 1. 사용자 등록(POST)
 ```
-POST /api/lotto/register
+POST /api/lotto
 
 {
     "name" : "jiwon",
@@ -69,7 +69,7 @@ response
 
 ### 5. 로또 전체 결과 조회(GET)
 ```
-GET /api/lotto/allResults?winNumbers=1,2,3,4,5,6
+GET /api/lotto/result/all?winNumbers=1,2,3,4,5,6
 
 response
 {

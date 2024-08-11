@@ -4,25 +4,21 @@ import java.util.List;
 
 public class LottoResult {
 
-    private final List<Integer> lottoNumbers;
-    private final List<Integer> winNumbers;
     private final LottoRank rank;
 
     public LottoResult(List<Integer> lottoNumbers, List<Integer> winNumbers) {
-        this.lottoNumbers = lottoNumbers;
-        this.winNumbers = winNumbers;
-        this.rank = calculateRank();
+        this.rank = calculateRank(lottoNumbers, winNumbers);
     }
 
-    private LottoRank calculateRank() {
+    private LottoRank calculateRank(List<Integer> lottoNumbers, List<Integer> winNumbers) {
         int matchCount = 0;
         for (Integer number : lottoNumbers) {
-            matchCount = getMatchCount(matchCount, number);
+            matchCount = getMatchCount(winNumbers, matchCount, number);
         }
         return LottoRank.getRank(matchCount);
     }
 
-    private int getMatchCount(int matchCount, Integer number) {
+    private int getMatchCount(List<Integer> winNumbers, int matchCount, Integer number) {
         if (winNumbers.contains(number)) {
             matchCount++;
         }
@@ -32,5 +28,4 @@ public class LottoResult {
     public LottoRank getLottoRank() {
         return rank;
     }
-
 }

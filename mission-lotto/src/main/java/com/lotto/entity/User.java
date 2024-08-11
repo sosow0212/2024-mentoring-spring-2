@@ -1,10 +1,14 @@
 package com.lotto.entity;
 
+import com.lotto.domain.LottoRank;
+import com.lotto.domain.LottoResult;
+import com.lotto.exception.InsufficientFundsException;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +16,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
 @Table(name = "lotto_user")
@@ -39,7 +43,24 @@ public class User {
         this.userLotto.add(userLotto);
     }
 
-    public void subtractMoney(int amount) {
-        this.money -= amount;
+    public void validateMoney(int ticketCount) {
+        int price = ticketCount * 1000;
+        if (this.money < price) {
+            throw new InsufficientFundsException();
+        }
+    }
+
+    public int calculateTotalPrize(List<Integer> winNumbers) {
+        int prizeMoney = 0;
+        for (UserLotto userLotto : this.userLotto) {
+            LottoRank lottoRank = new LottoResult(userLotto.getLottoNumbers(), winNumbers).getLottoRank();
+            prizeMoney += lottoRank.getPrize();
+        }
+        return prizeMoney;
+    }
+
+    public void subtractMoney(int ticketCount) {
+        int price = ticketCount * 1000;
+        this.money -= price;
     }
 }

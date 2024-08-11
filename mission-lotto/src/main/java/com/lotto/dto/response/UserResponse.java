@@ -1,4 +1,4 @@
-package com.lotto.controller.dto;
+package com.lotto.dto.response;
 
 public record UserResponse(
         String name,

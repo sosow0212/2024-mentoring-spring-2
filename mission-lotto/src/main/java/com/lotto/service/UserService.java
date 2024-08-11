@@ -1,6 +1,6 @@
 package com.lotto.service;
 
-import com.lotto.controller.dto.RegisterRequest;
+import com.lotto.dto.request.RegisterRequest;
 import com.lotto.entity.User;
 import com.lotto.exception.NotExistUserNameException;
 import com.lotto.repository.UserRepository;
@@ -28,10 +28,8 @@ public class UserService {
     }
 
     public User getUserByName(String userName) {
-        User user = userRepository.findByUserName(userName);
-        if (user == null) {
-            throw new NotExistUserNameException();
-        }
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(NotExistUserNameException::new);
         return user;
     }
 

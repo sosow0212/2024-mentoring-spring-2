@@ -1,6 +1,6 @@
 package com.lotto;
 
-import com.lotto.controller.dto.RegisterRequest;
+import com.lotto.dto.request.RegisterRequest;
 import com.lotto.exception.NotExistUserNameException;
 import com.lotto.repository.UserRepository;
 import com.lotto.service.UserService;

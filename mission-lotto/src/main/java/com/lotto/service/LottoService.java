@@ -1,12 +1,10 @@
 package com.lotto.service;
 
 import com.lotto.domain.Lotto;
-import com.lotto.domain.LottoRank;
+import com.lotto.domain.LottoJudge;
 import com.lotto.domain.Lottos;
 import com.lotto.domain.RandomNumber;
-import com.lotto.domain.LottoResult;
 import com.lotto.entity.UserLotto;
-import com.lotto.exception.InsufficientFundsException;
 import com.lotto.exception.NotExistLottoException;
 import com.lotto.exception.NotExistUserNameException;
 import com.lotto.repository.LottoRepository;
@@ -15,6 +13,7 @@ import com.lotto.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,12 +31,11 @@ public class LottoService {
     }
 
     public void buyLotto(String name, int ticketCount) {
-        User user = userRepository.findByUserName(name);
-        checkUserName(user == null);
-
-        int price = ticketCount * 1000;
-        validateMoney(user, price);
-        Lottos lottos = Lottos.buyLotto(ticketCount, randomNumber);
+        User user = userRepository.findByUserName(name)
+                .orElseThrow(NotExistUserNameException::new);
+        user.validateMoney(ticketCount);
+        Lottos lottos = new Lottos(new ArrayList<>());
+        lottos = lottos.buyLotto(ticketCount, randomNumber);
 
         for (Lotto lotto : lottos.getLottos()) {
             UserLotto userLotto = UserLotto.create(lotto.getLottoNumbers(), user);
@@ -45,54 +43,37 @@ public class LottoService {
             lottoRepository.save(userLotto);
         }
 
-        user.subtractMoney(price);
+        user.subtractMoney(ticketCount);
         userRepository.save(user);
     }
 
-    private void checkUserName(boolean user) {
-        if (user) {
-            throw new NotExistUserNameException();
-        }
-    }
-
-    private void validateMoney(User user, int price) {
-        if (user.getMoney() < price) {
-            throw new InsufficientFundsException();
-        }
-    }
-
     public List<UserLotto> getUserLotto(String name) {
-        checkUserName(!userRepository.existsByUserName(name));
-        return lottoRepository.findByUser_UserName(name);
+        return lottoRepository.findByUser_UserName(name)
+                .orElseThrow(NotExistUserNameException::new);
     }
 
     public UserLotto getTargetLottoResult(Long lottoId) {
-        return lottoRepository.findByLottoId(lottoId).orElseThrow(() -> new NotExistLottoException());
+        return lottoRepository.findByLottoId(lottoId)
+                .orElseThrow(NotExistLottoException::new);
     }
 
     public int getUserLottoCount(User user) {
         return user.getUserLotto().size();
     }
 
-    public int calculateTotalPrize(User user, List<Integer> winNumbers) {
-        int prizeMoney = 0;
-        for (UserLotto userLotto : user.getUserLotto()) {
-            LottoRank lottoRank = getLottoRank(userLotto.getLottoNumbers(), winNumbers);
-            prizeMoney += lottoRank.getPrize();
-        }
-        return prizeMoney;
+    public int calculateUserPrize(User user, List<Integer> winNumbers) {
+        return user.calculateTotalPrize(winNumbers);
     }
 
-    public LottoRank getLottoRank(List<Integer> userLottoNumbers, List<Integer> winningNumbers) {
-        LottoResult result = new LottoResult(userLottoNumbers, winningNumbers);
-        return result.getLottoRank();
+    public List<Lotto> getLottoResults(String name, List<Integer> winNumbers) {
+        List<UserLotto> userLottos = getUserLotto(name);
+        Lottos lottos = new Lottos(userLottos.stream()
+                .map(userLotto -> Lotto.of(userLotto.getLottoNumbers()))
+                .toList());
+        return lottos.getLottos();
     }
 
-    public boolean isWinningLotto(List<Integer> userLottoNumbers, List<Integer> winningNumbers) {
-        LottoRank lottoRank = getLottoRank(userLottoNumbers, winningNumbers);
-        return switch (lottoRank) {
-            case FIRST, SECOND, THIRD, FOURTH -> true;
-            default -> false;
-        };
+    public LottoJudge createLottoJudge(UserLotto userLotto, List<Integer> winNumbers) {
+        return new LottoJudge(userLotto, winNumbers);
     }
 }

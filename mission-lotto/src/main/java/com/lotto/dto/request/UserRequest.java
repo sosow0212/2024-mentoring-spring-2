@@ -1,4 +1,4 @@
-package com.lotto.controller.dto;
+package com.lotto.dto.request;
 
 public record UserRequest(
         String name,

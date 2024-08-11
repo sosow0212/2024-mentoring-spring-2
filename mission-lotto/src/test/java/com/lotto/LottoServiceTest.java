@@ -1,9 +1,11 @@
 package com.lotto;
 
-import com.lotto.controller.dto.RegisterRequest;
+import com.lotto.dto.request.RegisterRequest;
+import com.lotto.domain.LottoJudge;
 import com.lotto.entity.User;
 import com.lotto.entity.UserLotto;
 import com.lotto.exception.InsufficientFundsException;
+import com.lotto.exception.NotExistLottoException;
 import com.lotto.exception.NotExistUserNameException;
 import com.lotto.repository.LottoRepository;
 import com.lotto.repository.UserRepository;
@@ -22,6 +24,7 @@ import static org.hibernate.validator.internal.util.Contracts.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
+@Transactional
 @SpringBootTest
 public class LottoServiceTest {
 
@@ -54,7 +57,6 @@ public class LottoServiceTest {
     }
 
     @Test
-    @Transactional
     void 사용자_로또_조회_테스트() {
         RegisterRequest registerRequest = new RegisterRequest("user1", 3000);
         userService.registerUser(registerRequest);
@@ -76,16 +78,18 @@ public class LottoServiceTest {
     }
 
     @Test
-    @Transactional
     void 당첨여부_조회_테스트() {
         RegisterRequest registerRequest = new RegisterRequest("user1", 3000);
         userService.registerUser(registerRequest);
-        User user = userRepository.findByUserName("user1");
+        User user = userRepository.findByUserName("user1")
+                .orElseThrow(NotExistLottoException::new);
+        ;
         List<Integer> winNumbers = List.of(1, 2, 3, 4, 5, 6);
 
         UserLotto userLotto = UserLotto.create(winNumbers, user);
         lottoRepository.save(userLotto);
-        boolean isWinning = lottoService.isWinningLotto(userLotto.getLottoNumbers(), winNumbers);
+        LottoJudge lottoJudge = new LottoJudge(userLotto, winNumbers);
+        boolean isWinning = lottoJudge.isWinningLotto();
 
         Assertions.assertTrue(isWinning);
     }

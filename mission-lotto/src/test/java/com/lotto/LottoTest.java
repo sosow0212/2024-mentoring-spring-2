@@ -4,6 +4,7 @@ import com.lotto.domain.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hibernate.validator.internal.util.Contracts.assertTrue;
@@ -17,7 +18,8 @@ public class LottoTest {
     @Test
     void 로또_구매_개수_테스트() {
         int numberOfTickets = 5;
-        Lottos lottos = Lottos.buyLotto(numberOfTickets, randomNumber);
+        Lottos lottos = new Lottos(new ArrayList<>());
+        lottos = lottos.buyLotto(numberOfTickets, randomNumber);
 
         Assertions.assertEquals(numberOfTickets, lottos.getLottos().size());
     }

@@ -32,4 +32,11 @@ public enum LottoRank {
         }
         return NONE;
     }
+
+    public boolean getRankResult(LottoRank lottoRank) {
+        if (lottoRank == NONE) {
+            return false;
+        } else
+            return true;
+    }
 }

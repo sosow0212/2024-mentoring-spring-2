@@ -18,7 +18,7 @@ import java.util.List;
 public class UserLotto {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long lottoId;
 
     @ElementCollection
