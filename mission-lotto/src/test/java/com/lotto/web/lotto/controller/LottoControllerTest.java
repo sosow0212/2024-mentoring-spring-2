@@ -2,9 +2,9 @@ package com.lotto.web.lotto.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lotto.web.lotto.dto.LottoRequest;
-import com.lotto.web.lotto.dto.LottoResponse;
-import com.lotto.web.lotto.dto.LottoResponses;
+import com.lotto.web.lotto.entity.LottoEntity;
 import com.lotto.web.lotto.service.LottoService;
+import com.lotto.web.member.entity.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +52,9 @@ class LottoControllerTest {
     @DisplayName("사용자 id로 로또 조회하기.")
     void showLottos() throws Exception {
         // given
-        List<LottoResponse> lottoResponse = List.of(new LottoResponse("[1, 2, 3, 4, 5, 6]", true));
-        LottoResponses lottoResponses = new LottoResponses(lottoResponse);
-        given(lottoService.getLottos(1L)).willReturn(lottoResponses);
+        Member member = new Member("jay", 5000);
+        List<LottoEntity> lottoEntities = List.of(new LottoEntity(member, "[1, 2, 3, 4, 5, 6]", 3));
+        given(lottoService.getLottos(1L)).willReturn(lottoEntities);
 
         // then
         mockMvc.perform(get("/api/members/{memberId}/lottos", 1L)
@@ -68,8 +68,9 @@ class LottoControllerTest {
     @DisplayName("사용자 id로 로또 조회해서 첫 번째 로또 조회하기.")
     void showLotto() throws Exception {
         // given
-        LottoResponse lottoResponse = new LottoResponse("[1, 2, 3, 4, 5, 6]", true);
-        given(lottoService.getLotto(1L, 1)).willReturn(lottoResponse);
+        Member member = new Member("jay", 5000);
+        List<LottoEntity> lottoEntities = List.of(new LottoEntity(member, "[1, 2, 3, 4, 5, 6]", 3));
+        given(lottoService.getLottos(1L)).willReturn(lottoEntities);
 
         // then
         mockMvc.perform(get("/api/members/{memberId}/lottos", 1L, 1)
@@ -77,6 +78,6 @@ class LottoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(lottoService).getLotto(1L, 1);
+        verify(lottoService).getLottos(1L);
     }
 }

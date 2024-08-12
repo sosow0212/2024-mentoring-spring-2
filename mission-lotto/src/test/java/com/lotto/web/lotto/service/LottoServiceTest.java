@@ -28,8 +28,9 @@ class LottoServiceTest {
     @Autowired
     private MemberRepository memberRepository;
     private Member member;
+
     @BeforeEach
-    void setup(){
+    void setup() {
         member = new Member("jay", 5000);
         memberRepository.save(member);
     }
@@ -56,7 +57,7 @@ class LottoServiceTest {
     @Test
     @Transactional(readOnly = true)
     @DisplayName("Lotto를 잘못된 userId로 조회한다.")
-    void getLottos_exception(){
+    void getLottos_exception() {
         // given
         String expected = "로또 없음.";
 

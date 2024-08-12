@@ -38,7 +38,6 @@ public class MemberService {
         MemberLotto memberLotto = new MemberLotto(member);
         memberLottoRepository.save(memberLotto);
         memberLotto.updateLottoCount(count);
-
     }
 
     @Transactional(readOnly = true)

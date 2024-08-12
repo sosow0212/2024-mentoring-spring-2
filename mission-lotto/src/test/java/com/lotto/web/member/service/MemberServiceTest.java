@@ -1,6 +1,7 @@
 package com.lotto.web.member.service;
 
-import com.lotto.web.member.service.exception.NotFoundMemberException;
+import com.lotto.web.member.entity.MemberLotto;
+import com.lotto.web.member.repository.MemberLottoRepository;
 import com.lotto.web.member.dto.CreateRequest;
 import com.lotto.web.member.entity.Member;
 import com.lotto.web.member.repository.MemberRepository;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -22,11 +22,17 @@ class MemberServiceTest {
     private MemberService memberService;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private MemberLottoRepository memberLottoRepository;
     private Member member;
+    private MemberLotto memberLotto;
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         member = new Member("jay", 5000);
+        memberLotto = new MemberLotto(member);
         memberRepository.save(member);
+        memberLottoRepository.save(memberLotto);
     }
 
     @Test
@@ -46,14 +52,14 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("Lotto를 구매하여 member 상태를 업데이트 한다.")
-    void buyLotto(){
+    void buyLotto() {
         // given
         memberService.buyLotto(member.getId(), 3);
         int expectedLottoCount = 3;
         int expectedMoney = 2000;
 
         // when
-        int actualLottoCount = member.getLottoCount();
+        int actualLottoCount = memberLotto.getLottoCount();
         int actualMoney = member.getMoney();
 
         // then
@@ -63,27 +69,13 @@ class MemberServiceTest {
 
     @Test
     @Transactional(readOnly = true)
-    @DisplayName("잘못된 유저 조회로 예외 발생시킨다.")
-    void findUser_exception(){
-        // given
-        String expected = "유저 없음.";
-
-        // when
-        NotFoundMemberException actual = assertThrows(NotFoundMemberException.class, () -> memberService.findUser(3L));
-
-        // then
-        assertEquals(expected, actual.getMessage());
-    }
-
-    @Test
-    @Transactional(readOnly = true)
     @DisplayName("모든 유저를 반환한다.")
-    void findAllUsers(){
+    void findAllUsers() {
         // given
         int expected = 1;
 
         // when
-        int actual = memberService.findAllUsers().memberResponses().size();
+        int actual = memberService.findAllUsers().size();
 
         // then
         assertEquals(expected, actual);
@@ -91,13 +83,13 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("당첨금을 저장한다.")
-    void saveWinning(){
+    void saveWinning() {
         // given
         memberService.saveWinning(member, 3);
         int expected = 5000;
 
         // when
-        int actual = member.getWinning();
+        int actual = memberLotto.getWinningPrice();
 
         // then
         assertEquals(expected, actual);

@@ -2,8 +2,8 @@ package com.lotto.web.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lotto.web.member.dto.CreateRequest;
-import com.lotto.web.member.dto.MemberResponse;
-import com.lotto.web.member.dto.MemberResponses;
+import com.lotto.web.member.entity.Member;
+import com.lotto.web.member.entity.MemberLotto;
 import com.lotto.web.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,8 @@ class MemberControllerTest {
     void createUser() throws Exception {
         // given
         CreateRequest createRequest = new CreateRequest("jay", 5000);
-        MemberResponse memberResponse = new MemberResponse(1L, "jay", 0, 0);
-        given(memberService.createMember(createRequest)).willReturn(memberResponse);
+        Member member = new Member("jay", 5000);
+        given(memberService.createMember(createRequest)).willReturn(member);
 
         // then
         mockMvc.perform(post("/api/members")
@@ -54,9 +54,9 @@ class MemberControllerTest {
     @DisplayName("모든 유저 보여주기.")
     void showUser() throws Exception {
         // given
-        List<MemberResponse> memberResponse = List.of(new MemberResponse(1L, "jay", 0, 0));
-        MemberResponses memberResponses = new MemberResponses(memberResponse);
-        given(memberService.findAllUsers()).willReturn(memberResponses);
+        Member member = new Member("jay", 5000);
+        List<MemberLotto> memberLottos = List.of(new MemberLotto(member));
+        given(memberService.findAllUsers()).willReturn(memberLottos);
 
         // then
         mockMvc.perform(get("/api/members")
