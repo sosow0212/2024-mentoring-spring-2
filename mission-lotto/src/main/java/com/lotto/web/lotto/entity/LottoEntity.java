@@ -19,10 +19,10 @@ public class LottoEntity {
     @Column
     private boolean win;
 
-    public LottoEntity(Member member, String lottoNumber, boolean win) {
+    public LottoEntity(Member member, String lottoNumber, int count) {
         this.member = member;
         this.lottoNumber = lottoNumber;
-        this.win = win;
+        this.win = isWin(count);
     }
 
     protected LottoEntity() {
@@ -34,5 +34,9 @@ public class LottoEntity {
 
     public boolean getWin() {
         return win;
+    }
+
+    private boolean isWin(int count){
+        return count >= 3;
     }
 }

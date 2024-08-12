@@ -18,10 +18,6 @@ public class Member {
     private String name;
     @Column
     private int money;
-    @Column
-    private int lottoCount;
-    @Column
-    private int winning;
 
     public Member(String name, int money) {
         this.name = name;
@@ -43,22 +39,9 @@ public class Member {
         return money;
     }
 
-    public int getLottoCount() {
-        return lottoCount;
-    }
-
-    public int getWinning() {
-        return winning;
-    }
-
-    public void buyLotto(int count) {
+    public void updateMoney(int count) {
         validateLottoMoney(count);
         this.money -= count * LOTTO_TICKET_PRICE;
-        this.lottoCount += count;
-    }
-
-    public void setWinning(int winning) {
-        this.winning = winning;
     }
 
     private void validateLottoMoney(int count) {

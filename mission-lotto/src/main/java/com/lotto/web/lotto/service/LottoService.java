@@ -38,8 +38,8 @@ public class LottoService {
     }
 
     public void buyLotto(LottoRequest lottoRequest) {
-        memberService.buyLotto(lottoRequest.userId(), lottoRequest.count());
         LottoAnswer lottoAnswer = getLottoAnswer();
+        memberService.buyLotto(lottoRequest.userId(), lottoRequest.count());
         saveLottos(lottoRequest, lottoAnswer.getLottoAnswer());
     }
 
@@ -55,14 +55,10 @@ public class LottoService {
         for (int i = 0; i < lottoRequest.count(); i++) {
             Lotto lotto = new Lotto(createRandomNumber);
             int count = getLottoRank(lotto.getLotto(), parsedLottoAnswer.getLottoNumber());
-            LottoEntity lottoEntity = LottoMapper.toLottoEntity(member, lotto.getLotto().toString(), win(count));
+            LottoEntity lottoEntity = LottoMapper.toLottoEntity(member, lotto.getLotto().toString(), count);
             lottoRepository.save(lottoEntity);
             memberService.saveWinning(member, count);
         }
-    }
-
-    private boolean win(int count) {
-        return count >= 3;
     }
 
     private int getLottoRank(List<Integer> lotto, List<Integer> lottoAnswer) {

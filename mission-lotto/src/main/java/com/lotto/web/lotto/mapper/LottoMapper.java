@@ -9,8 +9,8 @@ import java.util.List;
 
 public class LottoMapper {
 
-    public static LottoEntity toLottoEntity(Member member, String lottoNumber, boolean win) {
-        return new LottoEntity(member, lottoNumber, win);
+    public static LottoEntity toLottoEntity(Member member, String lottoNumber, int count) {
+        return new LottoEntity(member, lottoNumber, count);
     }
 
     public static LottoResponse toLottoResponse(LottoEntity lottoEntity) {
