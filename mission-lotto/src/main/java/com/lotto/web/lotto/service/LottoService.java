@@ -4,21 +4,20 @@ import com.lotto.web.lotto.domain.CreateRandomNumber;
 import com.lotto.web.lotto.domain.Lotto;
 import com.lotto.web.lotto.domain.LottoNumberParser;
 import com.lotto.web.lotto.domain.LottoRank;
-import com.lotto.web.lotto.dto.LottoResponses;
 import com.lotto.web.lotto.mapper.LottoMapper;
 import com.lotto.web.lotto.dto.LottoRequest;
-import com.lotto.web.lotto.dto.LottoResponse;
 import com.lotto.web.lotto.entity.LottoAnswer;
 import com.lotto.web.lotto.entity.LottoEntity;
 import com.lotto.web.member.entity.Member;
+import com.lotto.web.member.repository.MemberRepository;
 import com.lotto.web.member.service.MemberService;
 import com.lotto.web.lotto.repository.LottoAnswerRepository;
 import com.lotto.web.lotto.repository.LottoRepository;
+import com.lotto.web.member.service.exception.NotFoundMemberException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,12 +27,14 @@ public class LottoService {
     private final MemberService memberService;
     private final LottoRepository lottoRepository;
     private final LottoAnswerRepository lottoAnswerRepository;
+    private final MemberRepository memberRepository;
 
-    public LottoService(CreateRandomNumber createRandomNumber, MemberService memberService, LottoRepository lottoRepository, LottoAnswerRepository lottoAnswerRepository) {
+    public LottoService(CreateRandomNumber createRandomNumber, MemberService memberService, LottoRepository lottoRepository, LottoAnswerRepository lottoAnswerRepository, MemberRepository memberRepository) {
         this.createRandomNumber = createRandomNumber;
         this.memberService = memberService;
         this.lottoRepository = lottoRepository;
         this.lottoAnswerRepository = lottoAnswerRepository;
+        this.memberRepository = memberRepository;
     }
 
     public void buyLotto(LottoRequest lottoRequest) {
@@ -43,23 +44,13 @@ public class LottoService {
     }
 
     @Transactional(readOnly = true)
-    public LottoResponse getLotto(Long id, int order) {
-        LottoResponses lottoResponses = getLottos(id);
-        LottoResponses checkedOrderLottoResponses = LottoResponses.of(lottoResponses, order);
-        return checkedOrderLottoResponses.lottoResponses().get(order - 1);
-    }
-
-    @Transactional(readOnly = true)
-    public LottoResponses getLottos(Long id) {
-        List<LottoEntity> lottoEntities = lottoRepository.findAllByMemberId(id);
-        List<LottoResponse> lottoResponses = lottoEntities.stream()
-                .map(LottoMapper::toLottoResponse)
-                .toList();
-        return LottoMapper.toLottoResponses(lottoResponses);
+    public List<LottoEntity> getLottos(Long id) {
+        return lottoRepository.findAllByMemberId(id);
     }
 
     private void saveLottos(LottoRequest lottoRequest, String lottoAnswer) {
-        Member member = memberService.findUser(lottoRequest.userId());
+        Member member = memberRepository.findById(lottoRequest.userId())
+                .orElseThrow(NotFoundMemberException::new);
         LottoNumberParser parsedLottoAnswer = new LottoNumberParser(lottoAnswer);
         for (int i = 0; i < lottoRequest.count(); i++) {
             Lotto lotto = new Lotto(createRandomNumber);
@@ -80,8 +71,7 @@ public class LottoService {
     }
 
     private LottoAnswer getLottoAnswer() {
-        Optional<LottoAnswer> lottoAnswer = lottoAnswerRepository.findFirstByOrderById();
-        return lottoAnswer.orElseGet(this::createLottoAnswer);
+        return lottoAnswerRepository.findFirstByOrderById().orElseGet(this::createLottoAnswer);
     }
 
     private LottoAnswer createLottoAnswer() {

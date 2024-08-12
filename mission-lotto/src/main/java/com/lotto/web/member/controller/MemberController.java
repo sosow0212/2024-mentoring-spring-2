@@ -3,12 +3,13 @@ package com.lotto.web.member.controller;
 import com.lotto.web.member.dto.CreateRequest;
 import com.lotto.web.member.dto.MemberResponse;
 import com.lotto.web.member.dto.MemberResponses;
+import com.lotto.web.member.mapper.MemberMapper;
 import com.lotto.web.member.service.MemberService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -29,6 +30,10 @@ public class MemberController {
 
     @GetMapping("/members")
     public ResponseEntity<MemberResponses> showUsers() {
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.findAllUsers());
+        List<MemberResponse> memberResponse = memberService.findAllUsers().stream()
+                .map(MemberMapper::toMemberResponse)
+                .toList();
+        MemberResponses memberResponses = MemberMapper.toMemberResponses(memberResponse);
+        return ResponseEntity.ok(memberResponses);
     }
 }

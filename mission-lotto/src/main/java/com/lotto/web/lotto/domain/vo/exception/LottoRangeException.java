@@ -5,6 +5,6 @@ import com.lotto.web.global.exception.exceptions.CustomException;
 
 public class LottoRangeException extends CustomException {
     public LottoRangeException() {
-        super(CustomErrorCode.EXCEPTION_RANGE);
+        super(CustomErrorCode.NOT_LOTTO_RANGE_EXCEPTION);
     }
 }

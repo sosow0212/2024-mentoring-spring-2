@@ -18,6 +18,10 @@ public class LottoMapper {
     }
 
     public static LottoResponses toLottoResponses(List<LottoResponse> lottoResponses) {
-        return LottoResponses.form(lottoResponses);
+        return LottoResponses.from(lottoResponses);
+    }
+
+    public static LottoResponses toCheckedOrderLottoResponses(List<LottoResponse> lottoResponses, int order) {
+        return LottoResponses.of(lottoResponses, order);
     }
 }

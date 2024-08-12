@@ -1,15 +1,19 @@
 package com.lotto.web.member.entity;
 
-import com.lotto.web.member.entity.exception.NotFoundMoneyException;
+import com.lotto.web.global.exception.exceptions.CustomErrorCode;
+import com.lotto.web.global.exception.exceptions.CustomException;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "LottoUser")
 public class Member {
 
+    private static final int LOTTO_TICKET_PRICE = 1000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column
     private String name;
     @Column
@@ -49,7 +53,7 @@ public class Member {
 
     public void buyLotto(int count) {
         validateLottoMoney(count);
-        this.money -= count * 1000;
+        this.money -= count * LOTTO_TICKET_PRICE;
         this.lottoCount += count;
     }
 
@@ -58,8 +62,8 @@ public class Member {
     }
 
     private void validateLottoMoney(int count) {
-        if (money < count * 1000) {
-            throw new NotFoundMoneyException();
+        if (money < count * LOTTO_TICKET_PRICE) {
+            throw new CustomException(CustomErrorCode.MONEY_NOT_FOUNT_EXCEPTION);
         }
     }
 }

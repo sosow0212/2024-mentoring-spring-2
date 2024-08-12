@@ -1,4 +1,4 @@
 package com.lotto.web.global.exception.exceptions;
 
-public record ErrorResponse(String message) {
+public record ErrorResponse(int status, String message) {
 }

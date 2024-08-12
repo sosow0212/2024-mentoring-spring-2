@@ -3,7 +3,6 @@ package com.lotto.web.member.service;
 import com.lotto.web.lotto.domain.LottoPrice;
 import com.lotto.web.member.dto.CreateRequest;
 import com.lotto.web.member.dto.MemberResponse;
-import com.lotto.web.member.dto.MemberResponses;
 import com.lotto.web.member.entity.Member;
 import com.lotto.web.member.mapper.MemberMapper;
 import com.lotto.web.member.repository.MemberRepository;
@@ -30,23 +29,14 @@ public class MemberService {
     }
 
     public void buyLotto(Long id, int count) {
-        Member member = findUser(id);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(NotFoundMemberException::new);
         member.buyLotto(count);
     }
 
     @Transactional(readOnly = true)
-    public Member findUser(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(NotFoundMemberException::new);
-    }
-
-    @Transactional(readOnly = true)
-    public MemberResponses findAllUsers() {
-        List<Member> members = memberRepository.findAll();
-        List<MemberResponse> memberResponses = members.stream()
-                .map(MemberMapper::toMemberResponse)
-                .toList();
-        return MemberMapper.toMemberResponses(memberResponses);
+    public List<Member> findAllUsers() {
+        return memberRepository.findAll();
     }
 
     public void saveWinning(Member member, int count) {

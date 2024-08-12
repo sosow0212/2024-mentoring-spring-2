@@ -6,14 +6,14 @@ import java.util.List;
 
 public record LottoResponses(List<LottoResponse> lottoResponses) {
 
-    public static LottoResponses form(List<LottoResponse> lottoResponses) {
+    public static LottoResponses from(List<LottoResponse> lottoResponses) {
         validateLottoExist(lottoResponses);
         return new LottoResponses(lottoResponses);
     }
 
-    public static LottoResponses of(LottoResponses lottoResponses, int order) {
+    public static LottoResponses of(List<LottoResponse> lottoResponses, int order) {
         validateLottoOrder(lottoResponses, order);
-        return new LottoResponses(lottoResponses.lottoResponses());
+        return new LottoResponses(lottoResponses);
     }
 
     private static void validateLottoExist(List<LottoResponse> lottoResponses) {
@@ -22,8 +22,8 @@ public record LottoResponses(List<LottoResponse> lottoResponses) {
         }
     }
 
-    private static void validateLottoOrder(LottoResponses lottoResponses, int order) {
-        if (order < 1 || order > lottoResponses.lottoResponses().size()) {
+    private static void validateLottoOrder(List<LottoResponse> lottoResponses, int order) {
+        if (order < 1 || order > lottoResponses.size()) {
             throw new NotFoundLottoException();
         }
     }

@@ -8,6 +8,7 @@ public class LottoAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column
     private String lottoAnswer;
 
