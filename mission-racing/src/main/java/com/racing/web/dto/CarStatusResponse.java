@@ -1,23 +1,24 @@
 package com.racing.web.dto;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-
-import java.util.Map;
-
 public class CarStatusResponse {
 
-    private final Map<CarNameResponse, MoveCountResponse> carStatus;
+    private final String name;
+    private final int count;
 
-    public CarStatusResponse(CarNameResponse carNameResponse, MoveCountResponse moveCountResponse) {
-        this.carStatus = Map.of(carNameResponse, moveCountResponse);
+    public CarStatusResponse(String name, int count) {
+        this.name = name;
+        this.count = count;
     }
 
-    public static CarStatusResponse from(CarNameResponse carNameResponse, MoveCountResponse moveCountResponse) {
-        return new CarStatusResponse(carNameResponse, moveCountResponse);
+    public static CarStatusResponse from(String carName, int moveCount) {
+        return new CarStatusResponse(carName, moveCount);
     }
 
-    @JsonAnyGetter
-    public Map<CarNameResponse, MoveCountResponse> getCarStatusResponse() {
-        return carStatus;
+    public String getCarName(){
+        return name;
+    }
+
+    public int getMoveCount(){
+        return count;
     }
 }

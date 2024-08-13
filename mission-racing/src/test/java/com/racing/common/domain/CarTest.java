@@ -6,8 +6,6 @@ import com.racing.web.random.CreateRandomNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class CarTest {
@@ -39,21 +37,6 @@ class CarTest {
 
         // when
         String actual = car.getCarName();
-
-        // then
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("차 상태 반환 메서드 테스트")
-    void getStatus(){
-        // given
-        Name carName = new Name("aaa");
-        Car car = new Car(0, carName.getName());
-        Map<String, Integer> expected = Map.of("aaa",0);
-
-        // when
-        Map<String, Integer> actual = car.getStatus();
 
         // then
         assertEquals(expected, actual);

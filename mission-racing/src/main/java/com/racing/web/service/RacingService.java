@@ -43,13 +43,13 @@ public class RacingService {
     public CarStatusResponse getResultByName(String name) {
         Car car = carRepository.findCarByName(name)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.EXCEPTION_CAR));
-        return CarStatusResponse.from(CarNameResponse.form(car.getCarName()), MoveCountResponse.from(car.getMoveCount()));
+        return CarStatusResponse.from(car.getCarName(), car.getMoveCount());
     }
 
     private List<CarStatusResponse> getCarStatuses(List<Car> cars) {
         List<CarStatusResponse> carStatuses = new ArrayList<>();
         for (Car car : cars) {
-            carStatuses.add(CarStatusResponse.from(CarNameResponse.form(car.getCarName()), MoveCountResponse.from(car.getMoveCount())));
+            carStatuses.add(CarStatusResponse.from(car.getCarName(), car.getMoveCount()));
         }
         return carStatuses;
     }

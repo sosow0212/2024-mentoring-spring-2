@@ -23,7 +23,7 @@ public class CarNameParser {
         String[] parsedCarNames = carNames.split(SPLIT_STRING_DELIMITER);
         List<Name> Names = new ArrayList<>();
         for (String carName : parsedCarNames) {
-            Names.add(new Name(carName));
+            Names.add(Name.from(carName));
         }
         return Names;
     }
