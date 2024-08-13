@@ -1,7 +1,7 @@
 package com.lotto.web.member.controller;
 
 import com.lotto.web.member.dto.CreateRequest;
-import com.lotto.web.member.dto.CreatedResponse;
+import com.lotto.web.member.dto.CreateResponse;
 import com.lotto.web.member.dto.MemberResponse;
 import com.lotto.web.member.dto.MemberResponses;
 import com.lotto.web.member.mapper.MemberMapper;
@@ -24,8 +24,8 @@ public class MemberController {
 
     @PostMapping("/members")
     public ResponseEntity<Void> createUser(@RequestBody CreateRequest createRequest) {
-        CreatedResponse createdResponse = MemberMapper.toCreatedResponse(memberService.createMember(createRequest));
-        URI location = URI.create("/api/members/" + createdResponse.id());
+        CreateResponse createResponse = MemberMapper.toCreatedResponse(memberService.createMember(createRequest));
+        URI location = URI.create("/api/members/" + createResponse.id());
         return ResponseEntity.created(location).build();
     }
 

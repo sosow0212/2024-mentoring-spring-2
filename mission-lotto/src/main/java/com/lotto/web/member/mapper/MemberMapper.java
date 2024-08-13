@@ -1,7 +1,7 @@
 package com.lotto.web.member.mapper;
 
 import com.lotto.web.member.dto.CreateRequest;
-import com.lotto.web.member.dto.CreatedResponse;
+import com.lotto.web.member.dto.CreateResponse;
 import com.lotto.web.member.dto.MemberResponse;
 import com.lotto.web.member.dto.MemberResponses;
 import com.lotto.web.member.entity.Member;
@@ -19,8 +19,8 @@ public class MemberMapper {
         return new MemberResponse(memberLotto.getId(), memberLotto.getMember().getName(), memberLotto.getLottoCount(), memberLotto.getWinningPrice());
     }
 
-    public static CreatedResponse toCreatedResponse(Member member){
-        return new CreatedResponse(member.getId(), member.getName(), member.getMoney());
+    public static CreateResponse toCreatedResponse(Member member){
+        return new CreateResponse(member.getId(), member.getName(), member.getMoney());
     }
 
     public static MemberResponses toMemberResponses(List<MemberResponse> memberResponses) {
