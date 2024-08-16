@@ -886,3 +886,187 @@ void whenGetArticle_thenReturnListUsingJacksonTypeReference() throws Exception {
 ### 결론 
 * @Transactional을 사용하는 것은 테스트 간의 독립성을 보장하고, 데이터베이스 상태를 일관되게 유지하기 위함이다.(테스트 격리 관점에서 보았을 때도 사용하는 것이 맞음.)
 ---
+
+## Cookie, Session, JWT
+
+### 인증의 필요성
+
+* HTTP 프로토콜의 특징으로 인해 필요
+  * 비연결성 : 클라이언트가 서버에 요청을 하고나서 그에 걸맞는 응답을 보낸 후 서버와 클라이언트의 연결을 끊는 방식
+  * 무상태 : 커넥션이 끊는 순간 이후로 어떠한 상태정보를 유지하지않는 특성
+~~~
+서버는 클라이언트 기억하지 못함 -> 계속 기억시켜 줌  :: 이것이 인증
+~~~
+
+### Cookie
+* 쿠키는 사용자의 웹 브라우저에 저장되는 작은 데이터 조각.
+
+1. 쿠키 생성 및 저장
+   * 서버가 쿠키를 생성: 클라이언트(웹 브라우저)가 서버에 요청을 보내면, 서버는 응답에 쿠키를 포함시킴. 이 쿠키는 Set-Cookie라는 HTTP 헤더에 포함되어 전달.
+   * 클라이언트가 쿠키를 저장: 브라우저는 서버로부터 받은 쿠키를 클라이언트의 로컬 스토리지(브라우저의 쿠키 저장소)에 저장. 쿠키에는 이름, 값, 만료 시간, 경로 등의 정보가 포함되어 있음.
+
+2. 쿠키 전송
+   * 쿠키 전송: 이후 클라이언트가 동일한 서버에 요청을 보낼 때, 브라우저는 해당 요청에 자동으로 저장된 쿠키를 포함시켜서 같이 보냄. => HTTP 요청의 Cookie 헤더에 쿠키 정보가 포함되어 서버로 전달.
+   * 서버가 쿠키를 읽음: 서버는 클라이언트가 보낸 쿠키를 읽고, 쿠키의 값을 기반으로 사용자 식별. 
+
+3. 쿠키의 만료 및 삭제
+   * 만료 시간: 쿠키에는 만료 시간이 설정할 수 있음. 만료 시간이 지나면, 브라우저는 해당 쿠키를 자동으로 삭제.
+   * 수동 삭제: 사용자는 브라우저 설정을 통해 수동으로 쿠키를 삭제 가능.
+
+#### Cookie 사용법
+* 쿠키 생성(jakarta.servlet.http 패키지의 Cookie 클래스), response.addCookie() 메서드를 사용하여 클라이언트로 전송 가능
+    ~~~
+    Cookie uiColorCookie = new Cookie("color", "red");
+    response.addCookie(uiColorCookie);
+    ~~~
+
+* 쿠키의 만료 시간 설정. 쿠키의 유효 기간을 설정하려면 maxAge(int) 메서드를 사용. (예시는 1시간 설정)
+    ~~~
+    uiColorCookie.setMaxAge(60*60);
+    ~~~
+
+* 쿠키의 도메인 설정. setDomain(String) 메서드를 사용. (예시는 쿠키를 example.com 도메인과 그 하위 도메인에 전달되도록 설정)
+    ~~~
+    uiColorCookie.setDomain("example.com");
+    ~~~
+
+* 쿠키의 경로 설정. 쿠키가 전달될 경로를 설정하려면 setPath(String) 메서드를 사용. (예시는 쿠키를 /welcomeUser 경로와 그 하위 경로에만 전달되도록 설정)
+    ~~~
+    uiColorCookie.setPath("/welcomeUser");
+    ~~~
+
+* 도에인과 경로 설정 같이 하는 방법. 
+    ~~~
+    Cookie uiColorCookie = new Cookie("color", "red");
+    uiColorCookie.setDomain("example.com"); // example.com 도메인과
+    uiColorCookie.setPath("/user");         // /user 경로에 대해 유효하게 설정
+    response.addCookie(uiColorCookie);
+    ~~~
+
+** 이런식으로 하위에 전달되도록 설정하면, 따로 넘어갈때 쿠키 보내주지 않아도 됌. **
+
+* 서블릿에서 쿠키 읽기. 클라이언트는 요청 시 저장된 쿠키를 함께 보냄 -> 서블릿에서는 HttpServletRequest의 getCookies() 메서드를 사용하여 모든 쿠키를 가져올 수 있음. -> 읽어들여서 검증 가능.
+    ~~~
+    public Optional<String> readCookie(String key) {
+        return Arrays.stream(request.getCookies())
+          .filter(c -> key.equals(c.getName()))
+          .map(Cookie::getValue)
+          .findAny();
+    }
+    ~~~
+
+* 쿠키 삭제. 쿠키를 삭제하려면 동일한 이름의 쿠키를 생성하되, maxAge 값을 0으로 설정하여 클라이언트에 추가.
+    ~~~
+    Cookie userNameCookieRemove = new Cookie("userName", "");
+    userNameCookieRemove.setMaxAge(0);
+    response.addCookie(userNameCookieRemove);
+    ~~~
+
+### Session 
+* 세션은 서버에서 유지되는 사용자의 상태 정보를 의미
+ 
+1. 세션 생성 및 관리
+   * 세션 생성: 클라이언트가 서버에 처음 요청을 보낼 때, 서버는 새로운 세션을 생성. 이때 서버는 고유한 세션 ID를 생성하고, 이를 클라이언트에 전달.
+   * 세션 ID 전송: 세션 ID는 보통 쿠키에 저장하여 클라이언트에 전달함. 이후 클라이언트가 서버에 요청을 보낼 때, 이 세션 ID가 포함된 쿠키를 통해 서버에 전송.
+
+2. 서버 측 세션 관리
+   * 세션 데이터 저장: 서버는 세션 ID를 키로 사용하여 세션 데이터를 데베에 저장. => 세션 데이터에는 사용자 정보, 로그인 상태, 쇼핑카트 데이터 등이 있음.
+   * 세션 데이터 조회: 서버는 클라이언트가 보낸 세션 ID를 기반으로 해당 세션 데이터를 조회하고, 클라이언트의 상태를 유지. ex) 로그인한 사용자의 세션이 유지되어 다음 요청에서도 사용자를 인증 가능.
+
+3. 세션 만료 및 삭제
+   * 만료 시간: 세션에 만료 시간 설정 가능. 일정 시간 동안 활동이 없으면 세션이 만료되고, 서버는 세션 데이터를 삭제. 
+   * 수동 로그아웃: 사용자가 로그아웃을 요청하면, 서버는 해당 사용자의 세션 데이터를 삭제, 클라이언트의 세션 ID 쿠키도 무효화 가능.
+
+#### Session 사용법
+
+* 세션 생성(얻어오기). 세션은 HttpServletRequest의 getSession() 메서드를 사용하여 얻을 수 있음. 세션이 존재하지 않는 경우, 새로운 세션이 생성. 기존 세션만 얻고자 한다면 request.getSession(false)를 사용하면 된다.
+    ~~~
+    HttpSession session = request.getSession();
+    ~~~
+
+* 세션 속성 관리
+1. setAttribute(String, Object): 키와 값을 사용해 세션 속성을 생성하거나 대체.
+   ~~~
+   session.setAttribute("attributeKey", "Sample Value");
+   ~~~
+
+2. getAttribute(String): 주어진 이름(키)으로 속성 값을 읽을 수 있음.
+   ~~~
+   session.getAttribute("attributeKey");
+   ~~~
+   
+3. removeAttribute(String): 주어진 이름의 속성을 제거.
+   ~~~
+   session.removeAttribute("attributeKey");
+   ~~~
+
+4. 사용자가 로그아웃할 때 세션의 모든 데이터를 무효화하려면 invalidate() 메서드 사용.
+   ~~~
+   session.invalidate();
+   ~~~
+    
+
+
+### JWT (JSON WEB TOKEN)
+* JWT는 JSON 형식으로 인코딩된 정보를 포함하는 자가 인증 토큰.
+* JWT는 세 부분으로 구성:
+   1. 헤더(Header): 토큰의 타입(JWT)과 서명에 사용할 알고리즘(예: HMAC, RSA)을 지정.
+   2. 페이로드(Payload): 토큰에 포함될 정보. (ID, 권한, 만료 시간 등)
+   3. 서명(Signature): 헤더와 페이로드를 결합한 후, 지정된 비밀 키와 서명 알고리즘을 사용하여 생성된 서명. 서명은 토큰의 무결성을 확인하는 데 사용된다.
+
+1. JWT 생성
+   * 사용자 인증: 사용자가 로그인을 시도 -> 서버는 사용자 검증 -> JWT 발급: 자격 증명이 유효하면, 서버는 사용자의 정보를 기반으로 JWT를 생성. -> JWT 사용자에게 보냄.
+
+2. JWT 전송 및 검증
+   * 토큰 전송: 클라이언트는 요청 시 JWT를 서버에 보냄. 
+   * 토큰 검증: 서버측에서 헤더에 엑세스 토큰 있는지 검사, 페이로드 사용자 정보 추출하여 검증, 서명도 확인하여 검증 확인. -> 일치하면 통과
+
+3. JWT 만료 및 갱신
+   * 만료 시간: JWT는 만료 시간 있음. -> 만료 시간 지나면 유효하지 않은 토큰
+   * 토큰 갱신: 토큰이 만료되기 전에 클라이언트가 새로운 JWT를 요청. -> "리프레시 토큰"을 이용하여, 만료된 액세스 토큰을 갱신.
+
+#### JWT 사용법
+* 세팅 - Auth0는 JWT를 생성하고 관리할 수 있는 Java 라이브러리를 제공.
+~~~
+dependencies {
+    implementation 'com.auth0:java-jwt:4.2.1'
+}
+~~~
+
+* 알고리즘 및 검증기 설정. JWT를 서명하고 검증하기 위해 Algorithm 클래스의 인스턴스를 생성: 아래 코드에서, 비밀 키를 사용해 HMAC256 알고리즘을 초기화. 이 알고리즘은 JWT를 생성하고 검증할 때 사용된다.
+    ~~~
+    Algorithm algorithm = Algorithm.HMAC256("baeldung");
+    ~~~
+
+* 검증을 위해 JWTVerifier 인스턴스를 초기화. JWT.require(Algorithm) 메서드를 사용해 검증기 인스턴스를 생성하고, 발행자를 설정한 후 JWTVerifier 인스턴스를 빌드.
+    ~~~
+    JWTVerifier verifier = JWT.require(algorithm)
+      .withIssuer("Baeldung")
+      .build();
+    ~~~
+* JWT 생성
+    ~~~
+    String jwtToken = JWT.create()
+      .withIssuer("Baeldung")
+      .withSubject("Baeldung Details")
+      .withClaim("userId", "1234")
+      .withIssuedAt(new Date())
+      .withExpiresAt(new Date(System.currentTimeMillis() + 5000L))
+      .withJWTId(UUID.randomUUID().toString())
+      .withNotBefore(new Date(System.currentTimeMillis() + 1000L))
+      .sign(algorithm);
+    ~~~
+
+* JWT 검증. JWT를 검증하려면 JWTVerifier.verify(String) 메서드를 사용: 유효한 JWT를 파싱해 DecodedJWT 인스턴스를 반환.
+    ~~~
+    try {
+        DecodedJWT decodedJWT = verifier.verify(jwtToken);
+    } catch (JWTVerificationException e) {
+        System.out.println(e.getMessage());
+    }
+    ~~~
+    DecodedJWT 인스턴스를 얻으면, 해당 인스턴스의 메서드를 사용해 클레임(내용)을 가져올 수 있음.
+    ~~~
+    Claim claim = decodedJWT.getClaim("userId");
+    String userId = claim.asString();
+    ~~~
