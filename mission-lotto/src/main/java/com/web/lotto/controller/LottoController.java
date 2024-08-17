@@ -30,7 +30,7 @@ public class LottoController {
 
     private final LottoService lottoService;
 
-    @PostMapping("/lottos")
+    @PostMapping("/lottoTicket")
     public ResponseEntity<BuyTicketsResponse> buyTickets(@RequestBody BuyTicketsRequest request) {
         lottoService.buyLotto(request.userId(), request.ticketCount());
         BuyTicketsResponse response = new BuyTicketsResponse(request.userId(), request.ticketCount());
