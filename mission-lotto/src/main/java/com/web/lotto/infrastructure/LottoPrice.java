@@ -1,10 +1,12 @@
 package com.web.lotto.infrastructure;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
 @Getter
+@RequiredArgsConstructor
 public enum LottoPrice {
     FIRST_PRIZE(6, 2000000),
     SECOND_PRIZE(5, 1000000),
@@ -15,11 +17,6 @@ public enum LottoPrice {
 
     private final int count;
     private final int prizeAmount;
-
-    LottoPrice(final int count, final int prizeAmount) {
-        this.count = count;
-        this.prizeAmount = prizeAmount;
-    }
 
     public static LottoPrice getPrizeByCount(int matchingCount) {
         return Arrays.stream(values())
