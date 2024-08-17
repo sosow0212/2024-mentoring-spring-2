@@ -12,20 +12,17 @@ import com.web.user.domain.entity.User;
 import com.web.user.domain.repository.UserRepository;
 import com.web.user.service.exception.NotFoundUserException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class LottoService {
 
     private final UserRepository userRepository;
     private final LottoRepository lottoRepository;
-
-    public LottoService(final LottoRepository lottoRepository, final UserRepository userRepository) {
-        this.lottoRepository = lottoRepository;
-        this.userRepository = userRepository;
-    }
 
     public void buyLotto(Long userId, int ticketCount) {
         User user = userRepository.findById(userId)
@@ -33,7 +30,7 @@ public class LottoService {
         updateUser(ticketCount, user);
         RandomGeneratorLotto randomGeneratorLotto = new RandomGeneratorLotto();
         LottoTickets lottoTicketsGenerator = new LottoTickets(randomGeneratorLotto);
-        List<List<Integer>> tickets = lottoTicketsGenerator.generateLottoTickets(ticketCount);
+        List<List<Integer>> tickets = lottoTicketsGenerator.generateLottoTicketInventory(ticketCount);
         for (List<Integer> generatedNumbers : tickets) {
             saveLotto(user, generatedNumbers);
         }
