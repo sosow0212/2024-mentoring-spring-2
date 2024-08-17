@@ -35,10 +35,8 @@ public class UserControllerTest {
         User user = new User(1L, "John Doe", 1000, 0, null);
         CreateUserResponse response = new CreateUserResponse(1L, "Seeungboong", 1000, 0);
 
-
         //when
         Mockito.when(userService.registerUser(request.userName(), request.balance())).thenReturn(user);
-
 
         //then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users")

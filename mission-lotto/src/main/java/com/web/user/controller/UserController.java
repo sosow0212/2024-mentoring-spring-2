@@ -28,33 +28,22 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<CreateUserResponse> registerUser(@RequestBody CreateUserRequest request) {
-
         User user = userService.registerUser(request.userName(), request.balance());
-        CreateUserResponse response = new CreateUserResponse(
-                user.getUserId(), user.getUserName(), user.getBalance(), user.getLottoCount());
+        CreateUserResponse response = toCreateUserResponse(user);
         return ResponseEntity.ok(response);
-
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<CreateUserResponse> getUserById(@PathVariable Long userId) {
-
         User user = userService.getUserById(userId);
-        CreateUserResponse response = new CreateUserResponse(
-                user.getUserId(),
-                user.getUserName(),
-                user.getBalance(),
-                user.getLottoCount());
+        CreateUserResponse response = toCreateUserResponse(user);
         return ResponseEntity.ok(response);
-
     }
 
     @GetMapping("/allUsers")
     public ResponseEntity<List<CreateUserResponse>> getAllUsers() {
-
         List<User> users = userService
                 .getAllUsers();
-
         List<CreateUserResponse> response = users.stream()
                 .map(user -> new CreateUserResponse(
                         user.getUserId(),
@@ -62,9 +51,14 @@ public class UserController {
                         user.getBalance(),
                         user.getLottoCount()))
                 .toList();
-
         return ResponseEntity.ok(response);
-
     }
 
+    private static CreateUserResponse toCreateUserResponse(final User user) {
+        return new CreateUserResponse(
+                user.getUserId(),
+                user.getUserName(),
+                user.getBalance(),
+                user.getLottoCount());
+    }
 }
