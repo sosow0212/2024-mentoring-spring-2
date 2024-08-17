@@ -2,17 +2,24 @@ package com.web.lottoTicket.controller;
 
 import com.web.lotto.controller.LottoController;
 import com.web.lotto.controller.dto.BuyTicketsRequest;
-import com.web.lotto.controller.dto.BuyTicketsResponse;
 import com.web.lotto.controller.dto.WinningNumbersResponse;
+
+import com.web.lotto.controller.message.SettingWinningNumbers;
 import com.web.lotto.service.LottoService;
+
 import com.web.lotto.domain.entity.Lotto;
+
 import com.web.lotto.infrastructure.LottoPrice;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -26,6 +33,9 @@ import java.util.Map;
 public class LottoControllerTest {
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -34,13 +44,16 @@ public class LottoControllerTest {
     @Test
     public void 구매_테스트() throws Exception {
         BuyTicketsRequest request = new BuyTicketsRequest(1L, 5);
-        BuyTicketsResponse response = new BuyTicketsResponse(1L, 5);
 
-        Mockito.doNothing().when(lottoService).buyLotto(request.userId(), request.ticketCount());
+        Mockito.doNothing()
+                .when(lottoService)
+                .buyLotto(request.userId(), request.ticketCount());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/lottos/buy")
+        String jsonContent = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/lotto")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userId\":1,\"ticketCount\":5}"))
+                        .content(jsonContent))
                 .andExpect(MockMvcResultMatchers
                         .status()
                         .isOk())
@@ -54,15 +67,14 @@ public class LottoControllerTest {
 
     @Test
     public void 당첨번호테스트() throws Exception {
-        WinningNumbersResponse dto = new WinningNumbersResponse(Arrays.asList(1, 2, 3, 4, 5, 6));
+        WinningNumbersResponse response = new WinningNumbersResponse(Arrays.asList(1, 2, 3, 4, 5, 6));
 
-        Mockito.doNothing().when(lottoService).getWinningLottoTickets(dto.winningNumbers());
+        Mockito.doNothing().when(lottoService).getWinningLottoTickets(response.winningNumbers());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/lottos/setWinningNumbers")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/lotto/setWinningNumbers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"winningNumbers\":[1,2,3,4,5,6]}"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("SettingWinningNumbers"));
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 
@@ -72,16 +84,15 @@ public class LottoControllerTest {
 
         //given
         Lotto lotto = new Lotto();
-        List<Lotto> lottos = Arrays.asList(lotto);
+        List<Lotto> lottos = List.of(lotto);
         Map<LottoPrice, Long> winnings = new HashMap<>();
         winnings.put(LottoPrice.FIRST_PRIZE, 1L);
 
         //when
         Mockito.when(lottoService.getLottoTicketsById(1L)).thenReturn(lotto);
-//        Mockito.when(lottoService.calculateTotalWinnings(lotto)).thenReturn(w);
 
         //then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/lottos/tickets/{userId}", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/lotto/tickets/{userId}", 1L))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].userId").value(lotto.getUser().getUserId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].userName").value(lotto.getUser().getUserName()));

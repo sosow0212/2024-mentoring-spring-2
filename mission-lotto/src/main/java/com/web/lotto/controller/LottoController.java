@@ -11,6 +11,7 @@ import com.web.lotto.domain.entity.Lotto;
 
 import com.web.lotto.service.LottoService;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,17 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/lottos")
+@RequiredArgsConstructor
+@RequestMapping("/api/lotto")
 public class LottoController {
 
     private final LottoService lottoService;
 
-    public LottoController(final LottoService lottoService) {
-        this.lottoService = lottoService;
-    }
-
-    @PostMapping("/buying")
-
+    @PostMapping("/lottos")
     public ResponseEntity<BuyTicketsResponse> buyTickets(@RequestBody BuyTicketsRequest request) {
         lottoService.buyLotto(request.userId(), request.ticketCount());
         BuyTicketsResponse response = new BuyTicketsResponse(request.userId(), request.ticketCount());
@@ -41,7 +38,6 @@ public class LottoController {
     }
 
     @PostMapping("/settingWinningNumbers")
-
     public ResponseEntity<String> setWinningNumbers(@RequestBody WinningNumbersResponse winningNumbersResponse) {
         lottoService.getWinningLottoTickets(winningNumbersResponse.winningNumbers());
         return ResponseEntity.ok(new SettingWinningNumbers().toString());
@@ -49,10 +45,13 @@ public class LottoController {
 
     @GetMapping("/tickets")
     public ResponseEntity<List<LottoResponse>> getLottoTickets() {
-
         List<Lotto> lottoTickets = lottoService.getLottoTickets();
+        List<LottoResponse> lottoResponses = toLottoResponses(lottoTickets);
+        return ResponseEntity.ok(lottoResponses);
+    }
 
-        List<LottoResponse> lottoResponses = lottoTickets
+    private List<LottoResponse> toLottoResponses(final List<Lotto> lottoTickets) {
+        return lottoTickets
                 .stream()
                 .map(lotto -> new LottoResponse(
                         lotto.getId(),
@@ -61,24 +60,22 @@ public class LottoController {
                         lotto.getUser(),
                         lottoService.calculateWinnings(lotto)))
                 .toList();
-
-        return ResponseEntity.ok(lottoResponses);
     }
 
     @GetMapping("/tickets/{userId}")
-
     public ResponseEntity<LottoResponse> getLottoTicketsByUser(@PathVariable Long userId) {
-
         Lotto lotto = lottoService.getLottoTicketsById(userId);
+        LottoResponse lottoResponses = expressingLottoResponse(lotto);
+        return ResponseEntity.ok(lottoResponses);
+    }
 
-        LottoResponse lottoResponses = new LottoResponse(
+    private LottoResponse expressingLottoResponse(final Lotto lotto) {
+        return new LottoResponse(
                 lotto.getId(),
                 lotto.getLottoTickets(),
                 lotto.getWinningLottoTicket(),
                 lotto.getUser(),
                 lottoService.calculateWinnings(lotto));
-
-        return ResponseEntity.ok(lottoResponses);
     }
 
 }

@@ -20,19 +20,13 @@ public class UserService {
     }
 
     public User registerUser(String userName, int balance) {
-
         validateBalanceException(balance);
-        User user = User.builder()
-                .userName(userName)
-                .lottoCount(0)
-                .balance(balance)
-                .build();
+        User user = buildUser(userName, balance);
         return userRepository.save(user);
 
     }
 
     public User getUserById(Long userId) {
-
         return userRepository
                 .findById(userId)
                 .orElseThrow(NotFoundUserException::new);
@@ -40,16 +34,22 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-
         return userRepository.findAll();
 
     }
 
     private static void validateBalanceException(final int balance) {
-
         if (balance < 0) {
             throw new NegativeAmountException();
         }
 
+    }
+
+    private static User buildUser(final String userName, final int balance) {
+        return User.builder()
+                .userName(userName)
+                .lottoCount(0)
+                .balance(balance)
+                .build();
     }
 }
