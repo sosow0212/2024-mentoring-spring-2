@@ -18,10 +18,14 @@ public class RandomGeneratorLotto implements GeneratorLotto {
     @Override
     public List<Integer> generateRandomNumber() {
         List<Integer> numbers = new ArrayList<>();
+        generateLottoTicket(numbers);
+        return numbers;
+    }
+
+    private static void generateLottoTicket(final List<Integer> numbers) {
         while (numbers.size() < LOTTO_SIZE) {
             checkDuplicate(numbers);
         }
-        return numbers;
     }
 
     private static void checkDuplicate(List<Integer> numbers) {

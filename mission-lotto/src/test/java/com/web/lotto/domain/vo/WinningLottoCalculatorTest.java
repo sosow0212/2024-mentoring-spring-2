@@ -1,11 +1,9 @@
 package com.web.lotto.domain.vo;
 
-import com.web.lotto.infrastructure.LottoPrice;
 import com.web.lotto.infrastructure.RandomGeneratorLotto;
 import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +34,7 @@ public class WinningLottoCalculatorTest {
         int ticketCount = 5;
 
         // when
-        List<List<Integer>> tickets = lottoTickets.generateLottoTickets(ticketCount);
+        List<List<Integer>> tickets = lottoTickets.generateLottoTicketInventory(ticketCount);
 
         // then
         assertEquals(ticketCount, tickets.size());

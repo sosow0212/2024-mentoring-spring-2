@@ -15,6 +15,19 @@ public class WinningLottoCalculator {
     }
 
     public int calculateTotalWinnings(List<Integer> lotto, List<Integer> allLottoTickets) {
+        return calculateWinningsBasedOnPrice(lotto, allLottoTickets);
+    }
+
+    public Map<LottoPrice, Long> calculateWinningCheckNumbers(List<Integer> lotto, List<Integer> allLottoTickets) {
+        return wrapPrize(lotto, allLottoTickets);
+    }
+
+    public int getMatchingCount(List<Integer> lotto) {
+        long matchingCount = getCount(lotto);
+        return (int) matchingCount;
+    }
+
+    private int calculateWinningsBasedOnPrice(final List<Integer> lotto, final List<Integer> allLottoTickets) {
         return lotto
                 .stream()
                 .mapToInt(ticket -> {
@@ -26,18 +39,17 @@ public class WinningLottoCalculator {
                 .sum();
     }
 
-    public Map<LottoPrice, Long> calculateWinningCheckNumbers(List<Integer> lotto, List<Integer> allLottoTickets) {
+    private Map<LottoPrice, Long> wrapPrize(final List<Integer> lotto, final List<Integer> allLottoTickets) {
         return allLottoTickets.stream()
                 .map(ticket -> LottoPrice.getPrizeByCount(getMatchingCount(lotto)))
                 .collect(Collectors.groupingBy(prize -> prize, Collectors.counting()));
     }
 
-    public int getMatchingCount(List<Integer> lotto) {
-        long matchingCount = lotto
+    private long getCount(final List<Integer> lotto) {
+        return lotto
                 .stream()
                 .filter(winningNumbers::contains)
                 .count();
-        return (int) matchingCount;
     }
 
 }

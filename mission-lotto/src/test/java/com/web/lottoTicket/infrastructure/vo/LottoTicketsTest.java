@@ -1,6 +1,5 @@
 package com.web.lottoTicket.infrastructure.vo;
 
-import com.web.lotto.domain.vo.GeneratorLotto;
 import com.web.lotto.domain.vo.LottoTicket;
 import com.web.lotto.domain.vo.LottoTickets;
 import com.web.lotto.infrastructure.RandomGeneratorLotto;
@@ -23,7 +22,7 @@ public class LottoTicketsTest {
         LottoTickets lottoTickets = new LottoTickets(randomGeneratorLotto);
 
         //when
-        List<List<Integer>> generatedTickets = lottoTickets.generateLottoTickets(5);
+        List<List<Integer>> generatedTickets = lottoTickets.generateLottoTicketInventory(5);
 
         //then
         assertAll(
