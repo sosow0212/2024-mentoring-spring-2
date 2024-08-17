@@ -23,26 +23,22 @@ public class UserService {
         validateBalanceException(balance);
         User user = buildUser(userName, balance);
         return userRepository.save(user);
-
     }
 
     public User getUserById(Long userId) {
         return userRepository
                 .findById(userId)
                 .orElseThrow(NotFoundUserException::new);
-
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
-
     }
 
     private static void validateBalanceException(final int balance) {
         if (balance < 0) {
             throw new NegativeAmountException();
         }
-
     }
 
     private static User buildUser(final String userName, final int balance) {
