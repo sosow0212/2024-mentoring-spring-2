@@ -1,10 +1,12 @@
 package com.web.user.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.web.user.controller.dto.CreateUserResponse;
 import com.web.user.service.UserService;
 import com.web.user.controller.dto.CreateUserRequest;
 
 import com.web.user.domain.entity.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(final UserService userService) {
-        this.userService = userService;
-    }
+    private final ObjectMapper objectMapper;
 
     @PostMapping
     public ResponseEntity<CreateUserResponse> registerUser(@RequestBody CreateUserRequest request) {
