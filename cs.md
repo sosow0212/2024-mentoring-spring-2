@@ -1065,8 +1065,9 @@ dependencies {
         System.out.println(e.getMessage());
     }
     ~~~
-    DecodedJWT 인스턴스를 얻으면, 해당 인스턴스의 메서드를 사용해 클레임(내용)을 가져올 수 있음.
+    DecodedJWT 인스턴스를 얻으면, 해당 인스턴스의 메서드를 사용해 클레임을 가져올 수 있음.
     ~~~
     Claim claim = decodedJWT.getClaim("userId");
     String userId = claim.asString();
     ~~~
+---
