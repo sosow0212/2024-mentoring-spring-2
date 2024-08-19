@@ -1,4 +1,4 @@
-package com.board.Member.service.exception;
+package com.board.member.service.exception;
 
 import com.board.global.exception.exceptions.CustomErrorCode;
 import com.board.global.exception.exceptions.CustomException;

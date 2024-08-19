@@ -1,4 +1,4 @@
-package com.board.Member.domain;
+package com.board.member.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,15 +18,15 @@ public class Member {
     private String memNickName;
 
     @Column
-    private String memId;
+    private String memLoginId;
 
     @Column
     private String memPassword;
 
-    public Member(String memName, String memNickName, String memId, String memPassword){
+    public Member(String memName, String memNickName, String memLoginId, String memPassword){
         this.memName = memName;
         this.memNickName = memNickName;
-        this.memId = memId;
+        this.memLoginId = memLoginId;
         this.memPassword = memPassword;
     }
 

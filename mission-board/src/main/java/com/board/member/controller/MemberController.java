@@ -1,9 +1,9 @@
-package com.board.Member.controller;
+package com.board.member.controller;
 
-import com.board.Member.controller.dto.CreateRequest;
-import com.board.Member.controller.dto.CreateResponse;
-import com.board.Member.mapper.MemberMapper;
-import com.board.Member.service.MemberService;
+import com.board.member.controller.dto.CreateRequest;
+import com.board.member.controller.dto.CreateResponse;
+import com.board.member.mapper.MemberMapper;
+import com.board.member.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
