@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class CookieLoginService implements LoginService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Member login(HttpServletResponse response, LoginRequest loginRequest) {
         Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId()).orElseThrow(ExistMemberLoginIdException::new);
@@ -32,22 +34,17 @@ public class CookieLoginService implements LoginService {
         return member;
     }
 
-    @Override
-    public Member logout(HttpServletRequest request) {
-        Cookie cookie = getCookie(request);
-        Long memberId = Long.valueOf(cookie.getValue());
-        return memberRepository.findById(memberId).orElseThrow(ExistMemberException::new);
+    @Transactional(readOnly = true)
+    public Member findMemberByCookie(HttpServletRequest request) {
+        String memberId = readCookie(request).orElseThrow(ExistCookieException::new);
+        Long realMemberId = Long.valueOf(memberId);
+        return memberRepository.findById(realMemberId).orElseThrow(ExistMemberException::new);
     }
 
-    private Cookie getCookie(HttpServletRequest request){
-        Cookie[] cookies = isValidCookies(request);
-        return Arrays.stream(cookies)
-                .filter(cookie -> "memberId".equals(cookie.getName()))
-                .findFirst()
-                .orElseThrow(ExistCookieException::new);
-    }
-
-    private Cookie[] isValidCookies(HttpServletRequest request){
-        return Optional.ofNullable(request.getCookies()).orElseThrow(ExistCookieException::new);
+    private Optional<String> readCookie(HttpServletRequest request) {
+        return Arrays.stream(request.getCookies())
+                .filter(c -> "memberId".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findAny();
     }
 }

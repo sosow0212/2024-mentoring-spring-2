@@ -4,7 +4,7 @@ import com.board.login.controller.dto.LoginRequest;
 import com.board.login.controller.dto.LoginResponse;
 import com.board.login.controller.dto.LogoutResponse;
 import com.board.login.domain.CookieStore;
-import com.board.login.service.LoginService;
+import com.board.login.service.CookieLoginService;
 import com.board.member.mapper.MemberMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class CookieLoginController {
 
-    private final LoginService loginService;
+    private final CookieLoginService cookieLoginService;
 
-    public CookieLoginController(LoginService loginService) {
-        this.loginService = loginService;
+    public CookieLoginController(CookieLoginService cookieLoginService) {
+        this.cookieLoginService = cookieLoginService;
     }
 
     @PostMapping("/members/cookie/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
-        LoginResponse loginResponse = MemberMapper.toLoginResponse(loginService.login(response, loginRequest));
+        LoginResponse loginResponse = MemberMapper.toLoginResponse(cookieLoginService.login(response, loginRequest));
         Cookie cookieCreate = new Cookie("memberId", String.valueOf(loginResponse.memberId()));
         cookieCreate.setMaxAge(60 * 60);
         response.addCookie(cookieCreate);
@@ -41,7 +41,7 @@ public class CookieLoginController {
 
     @PostMapping("members/cookie/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response, HttpServletRequest request){
-        LogoutResponse logoutResponse = MemberMapper.toLogoutResponse(loginService.logout(request));
+        LogoutResponse logoutResponse = MemberMapper.toLogoutResponse(cookieLoginService.findMemberByCookie(request));
         Cookie cookieRemove = new Cookie("memberId", "");
         cookieRemove.setMaxAge(0);
         response.addCookie(cookieRemove);
