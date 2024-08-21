@@ -4,6 +4,7 @@ import com.board.member.controller.dto.CreateRequest;
 import com.board.member.controller.dto.CreateResponse;
 import com.board.member.mapper.MemberMapper;
 import com.board.member.service.MemberService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,13 +15,10 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api")
+@AllArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
-
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
 
     @PostMapping("/members")
     public ResponseEntity<Void> createUser(@RequestBody CreateRequest createRequest) {

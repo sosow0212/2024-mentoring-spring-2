@@ -9,7 +9,9 @@ public enum CustomErrorCode {
     NOT_EXIST_MEMBER_LOGIN_ID(HttpStatus.BAD_REQUEST,"A003", "아이디가 일치하지 않습니다."),
     NOT_EXIST_MEMBER_PASSWORD(HttpStatus.BAD_REQUEST,"A004", "비밀번호가 일치하지 않습니다."),
     NOT_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "A005", "유저가 존재하지 않습니다."),
-    NOT_EXIST_COOKIE(HttpStatus.NO_CONTENT, "C001", "해당 쿠키가 존재하지 않습니다.");
+    NOT_EXIST_COOKIE(HttpStatus.NO_CONTENT, "C001", "해당 쿠키가 존재하지 않습니다."),
+    NOT_EXIST_SESSION(HttpStatus.BAD_REQUEST, "S001", "해당 세션이 존재하지 않습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String customCode;
