@@ -1,11 +1,9 @@
 package com.board.login.service;
 
 import com.board.login.controller.dto.LoginRequest;
-import com.board.login.domain.CookieEntity;
-import com.board.login.repository.CookieRepository;
 import com.board.login.service.exception.ExistCookieException;
+import com.board.login.service.exception.ExistMemberException;
 import com.board.login.service.exception.ExistMemberLoginIdException;
-import com.board.login.service.exception.ExistMemberPasswordException;
 import com.board.member.domain.Member;
 import com.board.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
@@ -14,72 +12,42 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Service
 @Primary
 public class CookieLoginService implements LoginService {
 
     private final MemberRepository memberRepository;
-    private final CookieRepository cookieRepository;
 
-    public CookieLoginService(MemberRepository memberRepository, CookieRepository cookieRepository) {
+    public CookieLoginService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
-        this.cookieRepository = cookieRepository;
     }
 
     @Override
-    public String login(HttpServletResponse response, LoginRequest loginRequest) {
-        Member member = memberRepository.findByMemLoginId(loginRequest.memLoginId());
-        if (member == null) {
-            throw new ExistMemberLoginIdException();
-        }
-        if (!Objects.equals(member.getMemPassword(), loginRequest.memPassword())) {
-            throw new ExistMemberPasswordException();
-        }
-        Cookie createdCookie = createCookie(response, String.valueOf(member.getId()));
-        saveCookie(createdCookie.getName(), createdCookie.getValue());
-        return member.getMemNickName();
+    public Member login(HttpServletResponse response, LoginRequest loginRequest) {
+        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId()).orElseThrow(ExistMemberLoginIdException::new);
+        member.checkPassword(loginRequest.memberPassword());
+        return member;
     }
 
     @Override
-    public void logout(HttpServletResponse response, HttpServletRequest request) {
-        deleteCookie(response);
-        removeCookie(request);
+    public Member logout(HttpServletRequest request) {
+        Cookie cookie = getCookie(request);
+        Long memberId = Long.valueOf(cookie.getValue());
+        return memberRepository.findById(memberId).orElseThrow(ExistMemberException::new);
     }
 
-    private Cookie createCookie(HttpServletResponse response, String cookieContent) {
-        Cookie cookieCreate = new Cookie("memberId", cookieContent);
-        cookieCreate.setMaxAge(60 * 60);
-        cookieCreate.setPath("/board");
-        response.addCookie(cookieCreate);
-        return cookieCreate;
+    private Cookie getCookie(HttpServletRequest request){
+        Cookie[] cookies = isValidCookies(request);
+        return Arrays.stream(cookies)
+                .filter(cookie -> "memberId".equals(cookie.getName()))
+                .findFirst()
+                .orElseThrow(ExistCookieException::new);
     }
 
-    private void deleteCookie(HttpServletResponse response) {
-        Cookie cookieRemove = new Cookie("memberId", "");
-        cookieRemove.setMaxAge(0);
-        cookieRemove.setPath("/board");
-        response.addCookie(cookieRemove);
-    }
-
-    private void saveCookie(String cookieName, String cookieContent) {
-        CookieEntity cookieEntity = new CookieEntity(cookieName, cookieContent);
-        cookieRepository.save(cookieEntity);
-    }
-
-    private void removeCookie(HttpServletRequest request) {
-        CookieEntity cookie = getCookie(request, "memberId");
-        cookieRepository.delete(cookie);
-    }
-
-    public CookieEntity getCookie(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (Objects.equals(cookie.getName(), cookieName)) {
-                return cookieRepository.findByCookieName(cookieName);
-            }
-        }
-        throw new ExistCookieException();
+    private Cookie[] isValidCookies(HttpServletRequest request){
+        return Optional.ofNullable(request.getCookies()).orElseThrow(ExistCookieException::new);
     }
 }

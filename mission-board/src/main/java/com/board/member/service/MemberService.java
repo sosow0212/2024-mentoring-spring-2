@@ -19,20 +19,20 @@ public class MemberService {
 
     public Member signUp(CreateRequest createRequest){
         Member member = MemberMapper.toMember(createRequest);
-        checkDuplicateMemLoginId(member.getMemLoginId());
-        checkDuplicateMemNickName(member.getMemNickName());
+        checkDuplicateMemberLoginId(member.getMemberLoginId());
+        checkDuplicateMemNickName(member.getMemberNickName());
         memberRepository.save(member);
         return member;
     }
 
-    private void checkDuplicateMemLoginId(String memId){
-        if(memberRepository.existsByMemLoginId(memId)){
+    private void checkDuplicateMemberLoginId(String memId){
+        if(memberRepository.existsByMemberLoginId(memId)){
             throw new ExistMemberIdException();
         }
     }
 
-    private void checkDuplicateMemNickName(String memNickName){
-        if(memberRepository.existsByMemNickName(memNickName)){
+    private void checkDuplicateMemNickName(String memberNickName){
+        if(memberRepository.existsByMemberNickName(memberNickName)){
             throw new ExistMemberNickNameException();
         }
     }

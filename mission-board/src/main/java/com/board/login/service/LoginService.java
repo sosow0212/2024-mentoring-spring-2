@@ -1,12 +1,12 @@
 package com.board.login.service;
 
 import com.board.login.controller.dto.LoginRequest;
+import com.board.member.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface LoginService {
 
-    String login(HttpServletResponse response, LoginRequest loginRequest);
-
-    void logout(HttpServletResponse response, HttpServletRequest request);
+    Member login(HttpServletResponse response, LoginRequest loginRequest);
+    Member logout(HttpServletRequest request);
 }

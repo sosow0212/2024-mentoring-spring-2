@@ -1,10 +1,16 @@
 package com.board.member.domain;
 
+import com.board.member.domain.exception.ExistMemberPasswordException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Getter
+import java.util.Objects;
+
 @Entity
+@Getter
+@NoArgsConstructor
 public class Member {
 
     @Id
@@ -12,25 +18,31 @@ public class Member {
     private Long id;
 
     @Column
-    private String memName;
+    @NotBlank
+    private String memberName;
 
     @Column
-    private String memNickName;
+    @NotBlank
+    private String memberNickName;
 
     @Column
-    private String memLoginId;
+    @NotBlank
+    private String memberLoginId;
 
     @Column
-    private String memPassword;
+    @NotBlank
+    private String memberPassword;
 
-    public Member(String memName, String memNickName, String memLoginId, String memPassword){
-        this.memName = memName;
-        this.memNickName = memNickName;
-        this.memLoginId = memLoginId;
-        this.memPassword = memPassword;
+    public Member(String memberName, String memberNickName, String memberLoginId, String memberPassword){
+        this.memberName = memberName;
+        this.memberNickName = memberNickName;
+        this.memberLoginId = memberLoginId;
+        this.memberPassword = memberPassword;
     }
 
-    protected Member() {
-
+    public void checkPassword(String requestPassword){
+        if(!Objects.equals(memberPassword, requestPassword)){
+            throw new ExistMemberPasswordException();
+        }
     }
 }

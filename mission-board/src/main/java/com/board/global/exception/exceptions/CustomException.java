@@ -5,7 +5,7 @@ public class CustomException extends RuntimeException {
     private final CustomErrorCode customErrorCode;
 
     public CustomException(CustomErrorCode customErrorCode) {
-        super(customErrorCode.getStatus() + ": " + customErrorCode.getMessage());
+        super(customErrorCode.getCustomCode() + ": " + customErrorCode.getMessage());
         this.customErrorCode = customErrorCode;
     }
 
