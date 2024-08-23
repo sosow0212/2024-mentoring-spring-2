@@ -1071,3 +1071,17 @@ dependencies {
     String userId = claim.asString();
     ~~~
 ---
+
+## HttpSession
+
+* 서블릿에서는 세션 매니저 역할을 하는 객체를 제공하고 있음. 이것이 바로 HttpSession
+
+* 그렇다면 정확히 세션 매니저 역할이 무엇일까.
+  * 세션 생성해서 쿠키에 저장하는 역할.
+  * 세션이 담긴 쿠키 가져오는 역할.
+  * 세션 삭제하는 역할.
+  * 등등
+
+* 위와 같은 역할을 하는 메서드를 HttpSession 객체가 제공함. 
+* HttpSession 이 세션 생성하면 -> 이 때의 쿠키 이름은 JSESSIONID이며 HttpOnly 이기에 클라이언트에서 조작할 수 없다. 
+---
