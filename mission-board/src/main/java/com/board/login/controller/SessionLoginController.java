@@ -38,7 +38,7 @@ public class SessionLoginController {
 
     @PostMapping("/members/session/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request){
-        HttpSession httpSession = sessionLoginService.findSession(request);
+        HttpSession httpSession = request.getSession(false);
         LogoutResponse logoutResponse = MemberMapper.toLogoutResponse(sessionLoginService.findMemberBySession(httpSession));
         httpSession.invalidate();
         SessionStorage.deleteSession(logoutResponse.memberId());

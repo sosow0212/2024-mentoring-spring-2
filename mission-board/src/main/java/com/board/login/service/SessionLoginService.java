@@ -3,19 +3,15 @@ package com.board.login.service;
 import com.board.login.controller.dto.LoginRequest;
 import com.board.login.service.exception.ExistMemberException;
 import com.board.login.service.exception.ExistMemberLoginIdException;
-import com.board.login.service.exception.ExistSessionException;
 import com.board.member.domain.Member;
 import com.board.member.repository.MemberRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SessionLoginService implements LoginService {
 
     private final MemberRepository memberRepository;
@@ -34,11 +30,4 @@ public class SessionLoginService implements LoginService {
         return memberRepository.findById(memberId)
                 .orElseThrow(ExistMemberException::new);
     }
-
-    @Transactional(readOnly = true)
-    public HttpSession findSession(HttpServletRequest request) {
-        return Optional.ofNullable(request.getSession(false))
-                .orElseThrow(ExistSessionException::new);
-    }
-
 }

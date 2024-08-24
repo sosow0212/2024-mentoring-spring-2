@@ -1163,3 +1163,118 @@ dependencies {
 7. 핸들러 어댑터가 반환값을 처리함
 8. 서버의 응답을 클라이언트로 반환함
 ---
+## 서블릿 필터 vs 스프링 인터셉터
+
+---
+## HandlerMethodArgumentResolver 로 공통 로직 줄이는 법
+
+1. Login 어노테이션 생성.
+    ~~~
+    package com.board.login.annotation;
+
+    import java.lang.annotation.ElementType;
+    import java.lang.annotation.Retention;
+    import java.lang.annotation.RetentionPolicy;
+    import java.lang.annotation.Target;
+    
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Login {
+    }
+   ~~~
+   * Login 어노테이션이 매개변수에 쓰일 것이기 때문에 ElementType.PARAMETER 로 설정.
+   * Login 어노테이션이 런타까지도 쓰일 것이기 때문에 RetentionPolicy.RUNTIME 로 설정
+
+2. HandlerMethodArgumentResolver 를 구현한 클래스를 만들어줌
+    ~~~
+
+    public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
+
+    private final SessionLoginService sessionLoginService;
+
+    public LoginArgumentResolver(SessionLoginService sessionLoginService) {
+        this.sessionLoginService = sessionLoginService;
+    }
+
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        boolean isLoginAnnotation = parameter.hasMethodAnnotation(Login.class);
+        boolean isMemberType = Member.class.isAssignableFrom(parameter.getParameterType());
+        return isLoginAnnotation && isMemberType;
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        HttpSession session = Optional.ofNullable(request.getSession(false))
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NOT_EXIST_SESSION));
+        return sessionLoginService.findMemberBySession(session);
+        }
+    }
+    ~~~
+   
+   * supportsParameter 메서드: 이 메서드는 HandlerMethodArgumentResolver 가 특정 파라미터를 처리할 수 있는지 여부를 결정하는 데 사용됌.
+      * 메서드의 반환 값이 true 이면, 해당 파라미터는 resolveArgument 메서드에서 처리. -> 뭔 말이냐면, 어떤 파라미터가 이 Argument Resolver에서 처리되어야 하는지를 판단해주는 메서드인 거임.
+
+   * resolveArgument 메서드: 실제로 파라미터의 값을 생성하고, 해당 값을 컨트롤러 메서드에 전달.
+     * supportsParameter 메서드에서 true 를 반환한 경우에 호출되어짐.
+     * NativeWebRequest webRequest: 현재 웹 요청에 대한 접근을 가능하게 함. 이 객체를 통해 HTTP 세션, 파라미터, 헤더 등에 접근할 수 있음.
+
+3. 구현한 HandlerMethodArgumentResolver 를 빈으로 등록.
+
+   ~~~
+   @Configuration
+   @RequiredArgsConstructor
+   public class WebConfig implements WebMvcConfigurer {
+
+    private final LoginArgumentResolver loginArgumentResolver;
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(loginArgumentResolver);
+       }
+   }
+   ~~~
+   * 이런식으로 등록.
+
+---
+## 어노테이션 구성
+* 어노테이션이란: Java 5(1.5)부터 등장한 기능으로, 한 마디로 요약하면 프로그램에 추가적인 정보를 제공해주는 메타 데이터 -> 어플리케이션이 처리해야 할 데이터가 아니라 컴파일 과정과 런타임에서 코드를 어떻게 컴파일하고 처리할 것인지에 대한 정보를 뜻함
+
+### 커스텀 어노테이션 구성
+* 커스텀 어노테이션은 메타 어노테이션을 사용하여 다음과 같은 구조를 가짐
+    * ~~~
+        @Target({ElementType.[적용대상]})
+        @Retention(RetentionPolicy.[정보유지되는 대상])
+        public @interface [어노테이션명]{
+        public 타입 elementName() [default 값]
+        ...
+        }
+      ~~~
+* 어노테이션의 필드 타입은 enum, String이나 기본 자료형, 기본 자료형의 배열만 사용할 수 있음
+
+** 메타 어노테이션의 종류 **
+~~~
+@Retention : 컴파일러가 어노테이션을 다루는 방법을 기술, 어느 시점까지 영향을 미치는지를 결정
+RetentionPolicy.SOURCE : 컴파일 전까지만 유효
+RetentionPolicy.CLASS : 컴파일러가 클래스를 참조할 때까지 유효
+RetentionPolicy.RUNTIME : 컴파일 이후 런타임 시기에도 JVM에 의해 참조가 가능(리플렉션)
+
+@Target : 어노테이션 적용할 위치 선택
+ElementType.PACKAGE : 패키지 선언
+ElementType.TYPE : 타입 선언
+ElementType.ANNOTATION_TYPE : 어노테이션 타입 선언
+ElementType.CONSTRUCTOR : 생성자 선언
+ElementType.FIELD : 멤버 변수 선언
+ElementType.LOCAL_VARIABLE : 지역 변수 선언
+ElementType.METHOD : 메서드 선언
+ElementType.PARAMETER : 전달인자 선언
+ElementType.TYPE_PARAMETER : 전달인자 타입 선언
+ElementType.TYPE_USE : 타입 선언
+
+@Documented : 해당 어노테이션을 Javadoc에 포함시킴
+@Inherited : 어노테이션의 상속을 가능하게 함
+@Repeatable : Java8 부터 지원하며, 연속적으로 어노테이션을 선언할 수 있게 함
+~~~
+
+---
