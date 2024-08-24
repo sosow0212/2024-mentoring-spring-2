@@ -27,6 +27,7 @@ public class SessionLoginService implements LoginService {
     @Transactional(readOnly = true)
     public Member findMemberBySession(HttpSession httpSession) {
         Long memberId = (Long) httpSession.getAttribute("memberId");
+        System.out.println(memberId);
         return memberRepository.findById(memberId)
                 .orElseThrow(ExistMemberException::new);
     }
