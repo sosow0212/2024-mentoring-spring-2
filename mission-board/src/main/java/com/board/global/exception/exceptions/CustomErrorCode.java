@@ -9,8 +9,12 @@ public enum CustomErrorCode {
     NOT_EXIST_MEMBER_LOGIN_ID(HttpStatus.BAD_REQUEST, "A003", "아이디가 일치하지 않습니다."),
     NOT_EXIST_MEMBER_PASSWORD(HttpStatus.BAD_REQUEST, "A004", "비밀번호가 일치하지 않습니다."),
     NOT_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "A005", "유저가 존재하지 않습니다."),
-    NOT_EXIST_COOKIE(HttpStatus.NO_CONTENT, "C001", "해당 쿠키가 존재하지 않습니다."),
-    NOT_EXIST_SESSION(HttpStatus.BAD_REQUEST, "S001", "해당 세션 유저가 존재하지 않습니다.");
+    NOT_EXIST_ARTICLE(HttpStatus.BAD_REQUEST, "B001", "게시된 글이 존재하지 않습니다."),
+    DO_NOT_HAVE_RIGHT_ARTICLE(HttpStatus.BAD_REQUEST, "B002", "게시글에 대한 권한이 존재하지 않습니다."),
+    NOT_EXIST_COMMENT(HttpStatus.BAD_REQUEST, "C001", "댓글이 존재하지 않습니다."),
+    DO_NOT_HAVE_RIGHT_COMMENT(HttpStatus.BAD_REQUEST, "C002", "댓글에 대한 권한이 존재하지 않습니다."),
+    NOT_EXIST_COOKIE(HttpStatus.NO_CONTENT, "L001", "해당 쿠키가 존재하지 않습니다."),
+    NOT_EXIST_SESSION(HttpStatus.BAD_REQUEST, "L002", "해당 세션 유저가 존재하지 않습니다.");
 
 
     private final HttpStatus httpStatus;

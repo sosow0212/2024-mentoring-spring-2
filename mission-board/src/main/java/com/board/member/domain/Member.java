@@ -33,16 +33,32 @@ public class Member {
     @NotBlank
     private String memberPassword;
 
-    public Member(String memberName, String memberNickName, String memberLoginId, String memberPassword){
+    public Member(String memberName, String memberNickName, String memberLoginId, String memberPassword) {
         this.memberName = memberName;
         this.memberNickName = memberNickName;
         this.memberLoginId = memberLoginId;
         this.memberPassword = memberPassword;
     }
 
-    public void checkPassword(String requestPassword){
-        if(!Objects.equals(memberPassword, requestPassword)){
+    public void updateMember(Long id, String memberName, String memberNickName, String memberLoginId, String memberPassword) {
+        this.id = id;
+        this.memberName = memberName;
+        this.memberNickName = memberNickName;
+        this.memberLoginId = memberLoginId;
+        this.memberPassword = memberPassword;
+    }
+
+    public void checkPassword(String requestPassword) {
+        if (!Objects.equals(memberPassword, requestPassword)) {
             throw new ExistMemberPasswordException();
         }
+    }
+
+    public boolean isMemberArticle(Long articleMemberId) {
+        return Objects.equals(id, articleMemberId);
+    }
+
+    public boolean isMemberComment(Long commentMemberId) {
+        return Objects.equals(id, commentMemberId);
     }
 }

@@ -1,6 +1,6 @@
 package com.board.member.controller.dto;
 
-public record CreateResponse(
+public record MemberResponse(
         Long id,
         String memberName,
         String memberNickName,
