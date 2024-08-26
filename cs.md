@@ -886,3 +886,395 @@ void whenGetArticle_thenReturnListUsingJacksonTypeReference() throws Exception {
 ### 결론 
 * @Transactional을 사용하는 것은 테스트 간의 독립성을 보장하고, 데이터베이스 상태를 일관되게 유지하기 위함이다.(테스트 격리 관점에서 보았을 때도 사용하는 것이 맞음.)
 ---
+
+## Cookie, Session, JWT
+
+### 인증의 필요성
+
+* HTTP 프로토콜의 특징으로 인해 필요
+  * 비연결성 : 클라이언트가 서버에 요청을 하고나서 그에 걸맞는 응답을 보낸 후 서버와 클라이언트의 연결을 끊는 방식
+  * 무상태 : 커넥션이 끊는 순간 이후로 어떠한 상태정보를 유지하지않는 특성
+~~~
+서버는 클라이언트 기억하지 못함 -> 계속 기억시켜 줌  :: 이것이 인증
+~~~
+
+### Cookie
+* 쿠키는 사용자의 웹 브라우저에 저장되는 작은 데이터 조각.
+
+1. 쿠키 생성 및 저장
+   * 서버가 쿠키를 생성: 클라이언트(웹 브라우저)가 서버에 요청을 보내면, 서버는 응답에 쿠키를 포함시킴. 이 쿠키는 Set-Cookie라는 HTTP 헤더에 포함되어 전달.
+   * 클라이언트가 쿠키를 저장: 브라우저는 서버로부터 받은 쿠키를 클라이언트의 로컬 스토리지(브라우저의 쿠키 저장소)에 저장. 쿠키에는 이름, 값, 만료 시간, 경로 등의 정보가 포함되어 있음.
+
+2. 쿠키 전송
+   * 쿠키 전송: 이후 클라이언트가 동일한 서버에 요청을 보낼 때, 브라우저는 해당 요청에 자동으로 저장된 쿠키를 포함시켜서 같이 보냄. => HTTP 요청의 Cookie 헤더에 쿠키 정보가 포함되어 서버로 전달.
+   * 서버가 쿠키를 읽음: 서버는 클라이언트가 보낸 쿠키를 읽고, 쿠키의 값을 기반으로 사용자 식별. 
+
+3. 쿠키의 만료 및 삭제
+   * 만료 시간: 쿠키에는 만료 시간이 설정할 수 있음. 만료 시간이 지나면, 브라우저는 해당 쿠키를 자동으로 삭제.
+   * 수동 삭제: 사용자는 브라우저 설정을 통해 수동으로 쿠키를 삭제 가능.
+
+#### Cookie 사용법
+* 쿠키 생성(jakarta.servlet.http 패키지의 Cookie 클래스), response.addCookie() 메서드를 사용하여 클라이언트로 전송 가능
+    ~~~
+    Cookie uiColorCookie = new Cookie("color", "red");
+    response.addCookie(uiColorCookie);
+    ~~~
+
+* 쿠키의 만료 시간 설정. 쿠키의 유효 기간을 설정하려면 maxAge(int) 메서드를 사용. (예시는 1시간 설정)
+    ~~~
+    uiColorCookie.setMaxAge(60*60);
+    ~~~
+
+* 쿠키의 도메인 설정. setDomain(String) 메서드를 사용. (예시는 쿠키를 example.com 도메인과 그 하위 도메인에 전달되도록 설정)
+    ~~~
+    uiColorCookie.setDomain("example.com");
+    ~~~
+
+* 쿠키의 경로 설정. 쿠키가 전달될 경로를 설정하려면 setPath(String) 메서드를 사용. (예시는 쿠키를 /welcomeUser 경로와 그 하위 경로에만 전달되도록 설정)
+    ~~~
+    uiColorCookie.setPath("/welcomeUser");
+    ~~~
+
+* 도에인과 경로 설정 같이 하는 방법. 
+    ~~~
+    Cookie uiColorCookie = new Cookie("color", "red");
+    uiColorCookie.setDomain("example.com"); // example.com 도메인과
+    uiColorCookie.setPath("/user");         // /user 경로에 대해 유효하게 설정
+    response.addCookie(uiColorCookie);
+    ~~~
+
+** 이런식으로 하위에 전달되도록 설정하면, 따로 넘어갈때 쿠키 보내주지 않아도 됌. **
+
+* 서블릿에서 쿠키 읽기. 클라이언트는 요청 시 저장된 쿠키를 함께 보냄 -> 서블릿에서는 HttpServletRequest의 getCookies() 메서드를 사용하여 모든 쿠키를 가져올 수 있음. -> 읽어들여서 검증 가능.
+    ~~~
+    public Optional<String> readCookie(String key) {
+        return Arrays.stream(request.getCookies())
+          .filter(c -> key.equals(c.getName()))
+          .map(Cookie::getValue)
+          .findAny();
+    }
+    ~~~
+
+* 쿠키 삭제. 쿠키를 삭제하려면 동일한 이름의 쿠키를 생성하되, maxAge 값을 0으로 설정하여 클라이언트에 추가.
+    ~~~
+    Cookie userNameCookieRemove = new Cookie("userName", "");
+    userNameCookieRemove.setMaxAge(0);
+    response.addCookie(userNameCookieRemove);
+    ~~~
+
+### Session 
+* 세션은 서버에서 유지되는 사용자의 상태 정보를 의미
+ 
+1. 세션 생성 및 관리
+   * 세션 생성: 클라이언트가 서버에 처음 요청을 보낼 때, 서버는 새로운 세션을 생성. 이때 서버는 고유한 세션 ID를 생성하고, 이를 클라이언트에 전달.
+   * 세션 ID 전송: 세션 ID는 보통 쿠키에 저장하여 클라이언트에 전달함. 이후 클라이언트가 서버에 요청을 보낼 때, 이 세션 ID가 포함된 쿠키를 통해 서버에 전송.
+
+2. 서버 측 세션 관리
+   * 세션 데이터 저장: 서버는 세션 ID를 키로 사용하여 세션 데이터를 데베에 저장. => 세션 데이터에는 사용자 정보, 로그인 상태, 쇼핑카트 데이터 등이 있음.
+   * 세션 데이터 조회: 서버는 클라이언트가 보낸 세션 ID를 기반으로 해당 세션 데이터를 조회하고, 클라이언트의 상태를 유지. ex) 로그인한 사용자의 세션이 유지되어 다음 요청에서도 사용자를 인증 가능.
+
+3. 세션 만료 및 삭제
+   * 만료 시간: 세션에 만료 시간 설정 가능. 일정 시간 동안 활동이 없으면 세션이 만료되고, 서버는 세션 데이터를 삭제. 
+   * 수동 로그아웃: 사용자가 로그아웃을 요청하면, 서버는 해당 사용자의 세션 데이터를 삭제, 클라이언트의 세션 ID 쿠키도 무효화 가능.
+
+#### Session 사용법
+
+* 세션 생성(얻어오기). 세션은 HttpServletRequest의 getSession() 메서드를 사용하여 얻을 수 있음. 세션이 존재하지 않는 경우, 새로운 세션이 생성. 기존 세션만 얻고자 한다면 request.getSession(false)를 사용하면 된다.
+    ~~~
+    HttpSession session = request.getSession();
+    ~~~
+
+* 세션 속성 관리
+1. setAttribute(String, Object): 키와 값을 사용해 세션 속성을 생성하거나 대체.
+   ~~~
+   session.setAttribute("attributeKey", "Sample Value");
+   ~~~
+
+2. getAttribute(String): 주어진 이름(키)으로 속성 값을 읽을 수 있음.
+   ~~~
+   session.getAttribute("attributeKey");
+   ~~~
+   
+3. removeAttribute(String): 주어진 이름의 속성을 제거.
+   ~~~
+   session.removeAttribute("attributeKey");
+   ~~~
+
+4. 사용자가 로그아웃할 때 세션의 모든 데이터를 무효화하려면 invalidate() 메서드 사용.
+   ~~~
+   session.invalidate();
+   ~~~
+    
+
+
+### JWT (JSON WEB TOKEN)
+* JWT는 JSON 형식으로 인코딩된 정보를 포함하는 자가 인증 토큰.
+* JWT는 세 부분으로 구성:
+   1. 헤더(Header): 토큰의 타입(JWT)과 서명에 사용할 알고리즘(예: HMAC, RSA)을 지정.
+   2. 페이로드(Payload): 토큰에 포함될 정보. (ID, 권한, 만료 시간 등)
+   3. 서명(Signature): 헤더와 페이로드를 결합한 후, 지정된 비밀 키와 서명 알고리즘을 사용하여 생성된 서명. 서명은 토큰의 무결성을 확인하는 데 사용된다.
+
+1. JWT 생성
+   * 사용자 인증: 사용자가 로그인을 시도 -> 서버는 사용자 검증 -> JWT 발급: 자격 증명이 유효하면, 서버는 사용자의 정보를 기반으로 JWT를 생성. -> JWT 사용자에게 보냄.
+
+2. JWT 전송 및 검증
+   * 토큰 전송: 클라이언트는 요청 시 JWT를 서버에 보냄. 
+   * 토큰 검증: 서버측에서 헤더에 엑세스 토큰 있는지 검사, 페이로드 사용자 정보 추출하여 검증, 서명도 확인하여 검증 확인. -> 일치하면 통과
+
+3. JWT 만료 및 갱신
+   * 만료 시간: JWT는 만료 시간 있음. -> 만료 시간 지나면 유효하지 않은 토큰
+   * 토큰 갱신: 토큰이 만료되기 전에 클라이언트가 새로운 JWT를 요청. -> "리프레시 토큰"을 이용하여, 만료된 액세스 토큰을 갱신.
+
+#### JWT 사용법
+* 세팅 - Auth0는 JWT를 생성하고 관리할 수 있는 Java 라이브러리를 제공.
+~~~
+dependencies {
+    implementation 'com.auth0:java-jwt:4.2.1'
+}
+~~~
+
+* 알고리즘 및 검증기 설정. JWT를 서명하고 검증하기 위해 Algorithm 클래스의 인스턴스를 생성: 아래 코드에서, 비밀 키를 사용해 HMAC256 알고리즘을 초기화. 이 알고리즘은 JWT를 생성하고 검증할 때 사용된다.
+    ~~~
+    Algorithm algorithm = Algorithm.HMAC256("baeldung");
+    ~~~
+
+* 검증을 위해 JWTVerifier 인스턴스를 초기화. JWT.require(Algorithm) 메서드를 사용해 검증기 인스턴스를 생성하고, 발행자를 설정한 후 JWTVerifier 인스턴스를 빌드.
+    ~~~
+    JWTVerifier verifier = JWT.require(algorithm)
+      .withIssuer("Baeldung")
+      .build();
+    ~~~
+* JWT 생성
+    ~~~
+    String jwtToken = JWT.create()
+      .withIssuer("Baeldung")
+      .withSubject("Baeldung Details")
+      .withClaim("userId", "1234")
+      .withIssuedAt(new Date())
+      .withExpiresAt(new Date(System.currentTimeMillis() + 5000L))
+      .withJWTId(UUID.randomUUID().toString())
+      .withNotBefore(new Date(System.currentTimeMillis() + 1000L))
+      .sign(algorithm);
+    ~~~
+
+* JWT 검증. JWT를 검증하려면 JWTVerifier.verify(String) 메서드를 사용: 유효한 JWT를 파싱해 DecodedJWT 인스턴스를 반환.
+    ~~~
+    try {
+        DecodedJWT decodedJWT = verifier.verify(jwtToken);
+    } catch (JWTVerificationException e) {
+        System.out.println(e.getMessage());
+    }
+    ~~~
+    DecodedJWT 인스턴스를 얻으면, 해당 인스턴스의 메서드를 사용해 클레임을 가져올 수 있음.
+    ~~~
+    Claim claim = decodedJWT.getClaim("userId");
+    String userId = claim.asString();
+    ~~~
+---
+
+## HttpSession
+
+* 서블릿에서는 세션 매니저 역할을 하는 객체를 제공하고 있음. 이것이 바로 HttpSession
+
+* 그렇다면 정확히 세션 매니저 역할이 무엇일까.
+  * 세션 생성해서 쿠키에 저장하는 역할.
+  * 세션이 담긴 쿠키 가져오는 역할.
+  * 세션 삭제하는 역할.
+  * 등등
+
+* 위와 같은 역할을 하는 메서드를 HttpSession 객체가 제공함. 
+* HttpSession 이 세션 생성하면 -> 이 때의 쿠키 이름은 JSESSIONID이며 HttpOnly 이기에 클라이언트에서 조작할 수 없다. 
+---
+
+## Servlet
+
+* 클라이언트의 요청을 처리하고, 그 결과를 반환하는 Servlet 클래스의 구현 규칙을 지킨 자바 웹 프로그래밍 기술 -> 쉽게 말해 자바를 사용하여 웹을 만들 때 필요한 기술.
+
+### Servlet 특징
+1. 클라이언트의 요청에 대해 동적으로 작동하는 웹 어플리케이션 컴포넌트
+2. html을 사용하여 요청에 응답한다.
+3. Java Thread를 이용하여 동작한다.
+4. MVC 패턴에서 Controller로 이용된다.
+5. HTTP 프로토콜 서비스를 지원하는 javax.servlet.http.HttpServlet 클래스를 상속받는다.
+6. UDP보다 처리 속도가 느리다.
+7. HTML 변경 시 Servlet을 재컴파일해야 하는 단점이 있다.
+
+### Servlet 동작 방식
+
+![서블릿 동작 방식](서블릿동작방식.jpg)
+
+1. 사용자(클라이언트)가 URL을 입력하면 HTTP Request가 Servlet Container로 전송.
+2. 요청을 전송받은 Servlet Container는 HttpServletRequest, HttpServletResponse 객체를 생성.
+3. web.xml을 기반으로 사용자가 요청한 URL이 어느 서블릿에 대한 요청인지 찾음.
+4. 해당 서블릿에서 service메소드를 호출한 후 클리아언트의 GET, POST여부에 따라 doGet() 또는 doPost()를 호출.
+5. doGet() or doPost() 메소드는 동적 페이지를 생성한 후 HttpServletResponse객체에 응답을 보냄.
+6. 응답이 끝나면 HttpServletRequest, HttpServletResponse 두 객체를 소멸시킴.
+
+### Servlet Container
+* 서블릿을 관리해주는 컨테이너 
+* 클라이언트의 요청(Request)을 받아주고 응답(Response)할 수 있게, 웹서버와 소켓으로 통신하며 대표적인 예로 톰캣(Tomcat)이 있다.
+
+### Servlet Container 역할
+1. 웹서버와의 통신 지원
+   * 서블릿 컨테이너는 서블릿과 웹서버가 손쉽게 통신할 수 있게 해준다. 일반적으로 우리는 소켓을 만들고 listen, accept 등을 해야하지만 서블릿 컨테이너는 이러한 기능을 API로 제공하여 복잡한 과정을 생략할 수 있게 해줌 -> 그래서 개발자가 서블릿에 구현해야 할 비지니스 로직에 대해서만 초점을 두게 한다.
+2. 서블릿 생명주기(Life Cycle) 관리 
+   * 서블릿 컨테이너는 서블릿의 탄생과 죽음을 관리. 서블릿 클래스를 로딩하여 인스턴스화하고, 초기화 메소드를 호출하고, 요청이 들어오면 적절한 서블릿 메소드를 호출. 또한 서블릿이 생명을 다 한 순간에는 적절하게 Garbage Collection(가비지 컬렉션)을 진행하여 편의를 제공.
+3. 멀티쓰레드 지원 및 관리 
+   * 서블릿 컨테이너는 요청이 올 때 마다 새로운 자바 쓰레드를 하나 생성하는데, HTTP 서비스 메소드를실행하고 나면, 쓰레드는 자동으로 죽음. 원래는 쓰레드를 관리해야 하지만 서버가 다중 쓰레드를생성 및 운영해주니 쓰레드의 안정성에 대해서 걱정하지 않아도 된다.
+4. 선언적인 보안 관리
+   * 서블릿 컨테이너를 사용하면 개발자는 보안에 관련된 내용을 서블릿 또는 자바 클래스에 구현해 놓지 않아도 됨.
+   
+### Servlet 생명주기
+![서블릿생명주기](서블릿생명주기.jpg)
+
+1. 클라이언트의 요청이 들어오면 컨테이너는 해당 서블릿이 메모리에 있는지 확인하고, 없을 경우 init()메소드를 호출하여 적재. 
+    * init()메소드는 처음 한번만 실행되기 때문에, 서블릿의 쓰레드에서 공통적으로 사용해야하는 것이 있다면 오버라이딩하여 구현하면 된다. 
+    * 실행 중 서블릿이 변경될 경우, 기존 서블릿을 파괴하고 init()을 통해 새로운 내용을 다시 메모리에 적재.
+   
+2. init()이 호출된 후 클라이언트의 요청에 따라서 service() 메소드를 통해 요청에 대한 응답이 doGet()가 doPost()로 분기됨. -> 이때 서블릿 컨테이너가 클라이언트의 요청이 오면 가장 먼저 처리하는 과정으로 생성된 HttpServletRequest, HttpServletResponse에 의해 request와 response객체가 제공된다.
+
+3. 컨테이너가 서블릿에 종료 요청을 하면 destroy()메소드가 호출되는데 마찬가지로 한번만 실행되며, 종료시에 처리해야하는 작업들은 destroy()메소드를 오버라이딩하여 구현하면 된다.
+---
+## DispatcherServlet
+** dispatch 는 보내다 라는 뜻을 가지고 있다.
+
+* HTTP 프로토콜로 들어오는 모든 요청을 가장 먼저 받아 적합한 컨트롤러에 위임해주는 프론트 컨트롤러(Front Controller)라고 정의할 수 있다.
+* 자세한 설명: 클라이언트로부터 어떠한 요청이 오면 Tomcat(톰캣)과 같은 서블릿 컨테이너가 요청을 받게 된다. 그리고 이 모든 요청을 프론트 컨트롤러인 디스패처 서블릿이 가장 먼저 받게 된다. 그러면 디스패처 서블릿은 공통적인 작업을 먼저 처리한 후에 해당 요청을 처리해야 하는 컨트롤러를 찾아서 작업을 위임함.
+
+### DispatcherServlet 의 장점
+
+* 해당 어플리케이션으로 들어오는 모든 요청을 핸들링해주고 공통 작업을 처리해줌.
+
+### DispatcherServlet 동작 과정
+
+1. 클라이언트의 요청을 디스패처 서블릿이 받음
+![디스패쳐서블릿](디스패쳐서블릿.jpg)
+    * 서블릿 컨텍스트(웹 컨텍스트)에서 필터들을 지나 스프링 컨텍스트에서 디스패처 서블릿이 가장 먼저 요청을 받게된다.
+     
+2. 요청 정보를 통해 요청을 위임할 컨트롤러를 찾음
+    * 가장 먼저 어느 컨트롤러가 요청을 처리할 수 있는지를 식별해야 하는데, 해당 역할을 하는 것이 바로 HandlerMapping 이다.
+   
+3. 요청을 컨트롤러로 위임할 핸들러 어댑터를 찾아서 전달함
+    * 디스패처 서블릿은 컨트롤러로 요청을 직접 위임하는 것이 아니라 HandlerAdapter를 통해 위임 한다.=> 다양하게 작성되는 컨트롤러에 대응하기 위해 스프링은 HandlerAdapter라는 어댑터 인터페이스를 통해 어댑터 패턴을 적용함으로써 컨트롤러의 구현 방식에 상관없이 요청을 위임할 수 있도록 함.
+
+4. 핸들러 어댑터가 컨트롤러로 요청을 위임함
+5. 비지니스 로직을 처리함
+6. 컨트롤러가 반환값을 반환함
+7. 핸들러 어댑터가 반환값을 처리함
+8. 서버의 응답을 클라이언트로 반환함
+---
+## 서블릿 필터 vs 스프링 인터셉터
+
+---
+## HandlerMethodArgumentResolver 로 공통 로직 줄이는 법
+
+1. Login 어노테이션 생성.
+    ~~~
+    package com.board.login.annotation;
+
+    import java.lang.annotation.ElementType;
+    import java.lang.annotation.Retention;
+    import java.lang.annotation.RetentionPolicy;
+    import java.lang.annotation.Target;
+    
+    @Target(ElementType.PARAMETER)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Login {
+    }
+   ~~~
+   * Login 어노테이션이 매개변수에 쓰일 것이기 때문에 ElementType.PARAMETER 로 설정.
+   * Login 어노테이션이 런타까지도 쓰일 것이기 때문에 RetentionPolicy.RUNTIME 로 설정
+
+2. HandlerMethodArgumentResolver 를 구현한 클래스를 만들어줌
+    ~~~
+
+    public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
+
+    private final SessionLoginService sessionLoginService;
+
+    public LoginArgumentResolver(SessionLoginService sessionLoginService) {
+        this.sessionLoginService = sessionLoginService;
+    }
+
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        boolean isLoginAnnotation = parameter.hasMethodAnnotation(Login.class);
+        boolean isMemberType = Member.class.isAssignableFrom(parameter.getParameterType());
+        return isLoginAnnotation && isMemberType;
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        HttpSession session = Optional.ofNullable(request.getSession(false))
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NOT_EXIST_SESSION));
+        return sessionLoginService.findMemberBySession(session);
+        }
+    }
+    ~~~
+   
+   * supportsParameter 메서드: 이 메서드는 HandlerMethodArgumentResolver 가 특정 파라미터를 처리할 수 있는지 여부를 결정하는 데 사용됌.
+      * 메서드의 반환 값이 true 이면, 해당 파라미터는 resolveArgument 메서드에서 처리. -> 뭔 말이냐면, 어떤 파라미터가 이 Argument Resolver에서 처리되어야 하는지를 판단해주는 메서드인 거임.
+
+   * resolveArgument 메서드: 실제로 파라미터의 값을 생성하고, 해당 값을 컨트롤러 메서드에 전달.
+     * supportsParameter 메서드에서 true 를 반환한 경우에 호출되어짐.
+     * NativeWebRequest webRequest: 현재 웹 요청에 대한 접근을 가능하게 함. 이 객체를 통해 HTTP 세션, 파라미터, 헤더 등에 접근할 수 있음.
+
+3. 구현한 HandlerMethodArgumentResolver 를 빈으로 등록.
+
+   ~~~
+   @Configuration
+   @RequiredArgsConstructor
+   public class WebConfig implements WebMvcConfigurer {
+
+    private final LoginArgumentResolver loginArgumentResolver;
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(loginArgumentResolver);
+       }
+   }
+   ~~~
+   * 이런식으로 등록.
+
+---
+## 어노테이션 구성
+* 어노테이션이란: Java 5(1.5)부터 등장한 기능으로, 한 마디로 요약하면 프로그램에 추가적인 정보를 제공해주는 메타 데이터 -> 어플리케이션이 처리해야 할 데이터가 아니라 컴파일 과정과 런타임에서 코드를 어떻게 컴파일하고 처리할 것인지에 대한 정보를 뜻함
+
+### 커스텀 어노테이션 구성
+* 커스텀 어노테이션은 메타 어노테이션을 사용하여 다음과 같은 구조를 가짐
+    * ~~~
+        @Target({ElementType.[적용대상]})
+        @Retention(RetentionPolicy.[정보유지되는 대상])
+        public @interface [어노테이션명]{
+        public 타입 elementName() [default 값]
+        ...
+        }
+      ~~~
+* 어노테이션의 필드 타입은 enum, String이나 기본 자료형, 기본 자료형의 배열만 사용할 수 있음
+
+** 메타 어노테이션의 종류 **
+~~~
+@Retention : 컴파일러가 어노테이션을 다루는 방법을 기술, 어느 시점까지 영향을 미치는지를 결정
+RetentionPolicy.SOURCE : 컴파일 전까지만 유효
+RetentionPolicy.CLASS : 컴파일러가 클래스를 참조할 때까지 유효
+RetentionPolicy.RUNTIME : 컴파일 이후 런타임 시기에도 JVM에 의해 참조가 가능(리플렉션)
+
+@Target : 어노테이션 적용할 위치 선택
+ElementType.PACKAGE : 패키지 선언
+ElementType.TYPE : 타입 선언
+ElementType.ANNOTATION_TYPE : 어노테이션 타입 선언
+ElementType.CONSTRUCTOR : 생성자 선언
+ElementType.FIELD : 멤버 변수 선언
+ElementType.LOCAL_VARIABLE : 지역 변수 선언
+ElementType.METHOD : 메서드 선언
+ElementType.PARAMETER : 전달인자 선언
+ElementType.TYPE_PARAMETER : 전달인자 타입 선언
+ElementType.TYPE_USE : 타입 선언
+
+@Documented : 해당 어노테이션을 Javadoc에 포함시킴
+@Inherited : 어노테이션의 상속을 가능하게 함
+@Repeatable : Java8 부터 지원하며, 연속적으로 어노테이션을 선언할 수 있게 함
+~~~
+
+---
