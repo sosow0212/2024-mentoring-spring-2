@@ -2,12 +2,12 @@ package com.board.login.domain;
 
 import jakarta.servlet.http.Cookie;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CookieStorage {
 
-    private final static Map<Long, Cookie> cookies = new HashMap<>();
+    private final static Map<Long, Cookie> cookies = new ConcurrentHashMap<>();
 
     public static void setCookie(Long memberId, Cookie cookie) {
         cookies.put(memberId, cookie);

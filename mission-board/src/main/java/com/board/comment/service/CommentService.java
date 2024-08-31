@@ -72,7 +72,7 @@ public class CommentService {
 
     private Comment checkRightAboutComment(Long commentId, Member member) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(ExistCommentException::new);
-        if (!member.isMemberComment(comment.getMember().getId())) {
+        if (!member.isSameMember(comment.getMember().getId())) {
             throw new CommentRightException();
         }
         return comment;

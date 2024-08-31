@@ -1358,3 +1358,25 @@ ElementType.TYPE_USE : 타입 선언
 ### 결론
 * 스프링 AOP는 엔터프라이즈 애플리케이션에서 발생하는 공통 문제를 해결하기 위해 AOP 개념을 이용하여, 메서드 실행 전후에 부가적인 로직을 삽입하는 기능을 제공. 이를 통해 로깅, 트랜잭션 관리와 같은 횡단 관심사를 효과적으로 처리할 수 있다. 
 * 스프링 AOP는 주로 프록시 기반으로 동작하며, 인터페이스 기반 프록시와 클래스 기반 프록시(CGLIB)를 필요에 따라 선택적으로 사용할 수 있다.
+---
+## Map 자료 구조의 동시성 문제 
+
+### 문제점
+~~~
+public class CookieStorage {
+
+    private final static Map<Long, Cookie> cookies = new HashMap<>();
+}
+~~~
+* HashMap은 스레드에 안전하지 않은 자료구조이다.
+* 여러 클라이언트 요청이 동시에 CookieStorage 클래스의 cookies 맵에 접근하여 데이터를 읽거나 쓰려고 한다면 동시성 문제가 발생.
+    * 두 스레드가 동시에 같은 Map에 값을 삽입하거나 삭제할 때, 한 스레드가 작업을 완료하기 전에 다른 스레드가 같은 자원에 접근하면 데이터가 손상될 수 있음.
+
+### 해결책: Concurrent 자료구조
+~~~
+public class CookieStorage {
+
+    private final static Map<Long, Cookie> cookies = new ConcurrentHashMap<>();
+}
+~~~
+* ConcurrentHashMap과 같은 스레드에 안전한 자료구조를 사용.

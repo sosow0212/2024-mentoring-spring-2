@@ -15,7 +15,8 @@ public class JwtLoginService implements LoginService{
 
     @Override
     public Member login(LoginRequest loginRequest) {
-        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId()).orElseThrow(ExistMemberLoginIdException::new);
+        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId())
+                .orElseThrow(ExistMemberLoginIdException::new);
         member.checkPassword(loginRequest.memberPassword());
         return member;
     }

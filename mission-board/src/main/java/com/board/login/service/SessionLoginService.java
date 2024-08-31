@@ -19,7 +19,8 @@ public class SessionLoginService implements LoginService {
     @Transactional(readOnly = true)
     @Override
     public Member login(LoginRequest loginRequest) {
-        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId()).orElseThrow(ExistMemberLoginIdException::new);
+        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId())
+                .orElseThrow(ExistMemberLoginIdException::new);
         member.checkPassword(loginRequest.memberPassword());
         return member;
     }

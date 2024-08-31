@@ -54,11 +54,7 @@ public class Member {
         }
     }
 
-    public boolean isMemberArticle(Long articleMemberId) {
-        return Objects.equals(id, articleMemberId);
-    }
-
-    public boolean isMemberComment(Long commentMemberId) {
-        return Objects.equals(id, commentMemberId);
+    public boolean isSameMember(Long boardObjectId) {
+        return Objects.equals(id, boardObjectId);
     }
 }

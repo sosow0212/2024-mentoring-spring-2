@@ -36,7 +36,8 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Article findArticle(Long articleId) {
-        return articleRepository.findById(articleId).orElseThrow(ExistArticleException::new);
+        return articleRepository.findById(articleId)
+                .orElseThrow(ExistArticleException::new);
     }
 
     public Article updateArticle(Long articleId, Long memberId, ArticleRequest articleRequest) {
@@ -66,7 +67,7 @@ public class ArticleService {
 
     private Article checkRightAboutArticle(Long articleId, Member member) {
         Article article = findArticle(articleId);
-        if (!member.isMemberArticle(article.getMember().getId())) {
+        if (!member.isSameMember(article.getMember().getId())) {
             throw new ArticleRightException();
         }
         return article;
