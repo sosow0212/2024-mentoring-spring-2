@@ -1025,6 +1025,13 @@ void whenGetArticle_thenReturnListUsingJacksonTypeReference() throws Exception {
    * 만료 시간: JWT는 만료 시간 있음. -> 만료 시간 지나면 유효하지 않은 토큰
    * 토큰 갱신: 토큰이 만료되기 전에 클라이언트가 새로운 JWT를 요청. -> "리프레시 토큰"을 이용하여, 만료된 액세스 토큰을 갱신.
 
+### JWT의 Bearer 토큰 형식
+* Bearer 토큰은 Authorization 헤더에 포함되어 서버에 전달된다. 이 형식은 "Bearer" 키워드 뒤에 JWT 토큰을 붙여서 보내는 형식임.
+* 왜 Bearer 토큰 형식을 사용할까?
+    1. 간편한 인증 방식: 클라이언트가 Authorization 헤더에 JWT를 포함해 요청을 보내면, 서버는 이 JWT를 기반으로 사용자를 인증함. "Bearer"는 인증 유형을 나타내며, "bearer"가 붙은 토큰은 서버가 신뢰할 수 있는 인증 정보를 담고 있다는 것을 의미.
+    2. 표준화된 형식: Bearer 토큰은 OAuth 2.0 표준에서 사용하는 방식으로, 다양한 애플리케이션에서 일관되게 사용할 수 있다.
+* 서버에서 Authorization 헤더에 Bearer 토큰이 있는지 확인하여 토큰 확인 진행함.
+
 #### JWT 사용법
 * 세팅 - Auth0는 JWT를 생성하고 관리할 수 있는 Java 라이브러리를 제공.
 ~~~
@@ -1404,6 +1411,48 @@ ElementType.TYPE_USE : 타입 선언
 * 스프링 AOP는 엔터프라이즈 애플리케이션에서 발생하는 공통 문제를 해결하기 위해 AOP 개념을 이용하여, 메서드 실행 전후에 부가적인 로직을 삽입하는 기능을 제공. 이를 통해 로깅, 트랜잭션 관리와 같은 횡단 관심사를 효과적으로 처리할 수 있다. 
 * 스프링 AOP는 주로 프록시 기반으로 동작하며, 인터페이스 기반 프록시와 클래스 기반 프록시(CGLIB)를 필요에 따라 선택적으로 사용할 수 있다.
 ---
+## AOP 와 인터셉터의 차이
+
+### AOP 작동 방식
+* AOP는 프록시를 통해 메서드 호출을 가로채어, 비즈니스 로직 전후에 추가적인 로직(어드바이스)을 실행할 수 있게 한다..
+* AOP는 메서드 실행, 예외 발생, 필드 접근 등 다양한 시점에서 동작 가능.
+* 보통 스프링에서는 AOP를 프록시 기반으로 구현하며, 주로 @AspectJ 스타일을 사용하여 애스펙트를 정의함.
+* 적용 범위
+   * AOP는 특정 클래스나 메서드에 국한되지 않고, 애플리케이션 전반에 걸쳐 공통된 로직 적용 가능.
+   * 트랜잭션 관리, 로깅, 보안, 성능 모니터링과 같은 다양한 로직에도 적용 가능.
+~~~
+@Aspect
+@Component
+public class LoggingAspect {
+
+@Before("execution(* com.example.service.*.*(..))")
+public void logBeforeMethod(JoinPoint joinPoint) {
+System.out.println("Executing method: " + joinPoint.getSignature().getName());
+}
+}
+ ~~~
+* 위 예제에서는 @Before 어드바이스를 통해 특정 패키지 내의 메서드가 호출되기 전에 로직 수행.
+
+### 인터셉터 작동 방식
+* 인터셉터는 주로 HTTP 요청/응답의 전처리(pre-processing)와 후처리(post-processing)에 사용.
+* HandlerInterceptor 인터페이스를 구현하여 preHandle, postHandle, afterCompletion 메서드를 오버라이드.
+* 특정 URL 패턴에 대해 적용되며, 요청이 해당 URL로 들어올 때마다 실행.
+* 적용 범위
+   * 인터셉터는 스프링 MVC에서 동작하며, 컨트롤러 로직 동작 전후에 동작함.
+   * 주로 인증/인가, 로깅, 데이터 변조 방지, 세션 관리 등 HTTP 요청과 관련된 작업을 처리하는 데 사용.
+
+### 결론
+* 동작 시점
+  * AOP: 메서드 호출 전후, 예외 발생 시, 필드 접근 시 등 다양한 시점
+  * 인터셉터: 요청 전후, 응답 후 (컨트롤러와 연관된 시점에서 동작)
+* 작동 방식
+  * AOP: 프록시 기반, 메서드 호출을 가로챔
+  * 인터셉터: DispatcherServlet와 컨트롤러 사이에서 동작
+* 적용범위
+  * AOP: 애플리케이션 전반 (메서드 실행, 필드 접근 등)
+  * 인터셉터: 스프링 MVC 요청/응답 처리에 국한.
+  
+---
 ## Map 자료 구조의 동시성 문제 
 
 ### 문제점
@@ -1427,6 +1476,3 @@ public class CookieStorage {
 * ConcurrentHashMap과 같은 스레드에 안전한 자료구조를 사용.
 
 ---
-
-
-
