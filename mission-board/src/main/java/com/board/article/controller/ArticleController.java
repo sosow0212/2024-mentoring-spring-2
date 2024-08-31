@@ -60,7 +60,7 @@ public class ArticleController {
     @GetMapping("/members/me/articles")
     public ResponseEntity<ArticleResponses> showMemberArticles(@Login Long memberId) {
         ArticleResponses articleResponses = ArticleMapper.toArticleResponses(articleService.findMemberArticles(memberId));
-        log.info("게시물 {}개를 불러왔습니다.", articleResponses.articleResponses().size());
+        log.info("모든 게시물을 불러왔습니다.");
         return ResponseEntity.ok(articleResponses);
     }
 }
