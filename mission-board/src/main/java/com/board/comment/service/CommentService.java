@@ -1,6 +1,7 @@
 package com.board.comment.service;
 
 import com.board.article.domain.Article;
+import com.board.article.service.event.ArticleFindEvent;
 import com.board.comment.controller.dto.CommentRequest;
 import com.board.comment.domain.Comment;
 import com.board.comment.mapper.CommentMapper;
@@ -8,7 +9,9 @@ import com.board.comment.repository.CommentRepository;
 import com.board.comment.service.exception.CommentRightException;
 import com.board.comment.service.exception.ExistCommentException;
 import com.board.member.domain.Member;
+import com.board.member.service.event.MemberFindEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +23,11 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ArticleFindByArticleIdService articleFindService;
+    private final ApplicationEventPublisher publisher;
 
-    public Comment createComment(CommentRequest commentRequest, Member member, Long articleId) {
-        Article article = articleFindService.findArticle(articleId);
+    public Comment createComment(CommentRequest commentRequest, Long memberId, Long articleId) {
+        Article article = findArticleByEvent(articleId);
+        Member member = findMemberByEvent(memberId);
         Comment comment = CommentMapper.toComment(member, article, commentRequest);
         commentRepository.save(comment);
         return comment;
@@ -31,34 +35,39 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<Comment> showAllComments(Long articleId) {
-        Article article = articleFindService.findArticle(articleId);
-        List<Comment> comments = commentRepository.findByArticleId(article.getId());
-        checkCommentExist(comments);
-        return comments;
+        Article article = findArticleByEvent(articleId);
+        return commentRepository.findByArticleId(article.getId());
     }
 
-    public Comment updateComment(CommentRequest commentRequest, Member member, Long commentId) {
+    public Comment updateComment(CommentRequest commentRequest, Long memberId, Long commentId) {
+        Member member = findMemberByEvent(memberId);
         Comment comment = checkRightAboutComment(commentId, member);
         comment.updateComment(commentRequest.content());
         return comment;
     }
 
-    public Comment deleteComment(Member member, Long commentId) {
+    public Comment deleteComment(Long memberId, Long commentId) {
+        Member member = findMemberByEvent(memberId);
         Comment comment = checkRightAboutComment(commentId, member);
         commentRepository.delete(comment);
         return comment;
     }
 
-    public List<Comment> showMemberComments(Member member) {
-        List<Comment> comments = commentRepository.findByMemberId(member.getId());
-        checkCommentExist(comments);
-        return comments;
+    public List<Comment> showMemberComments(Long memberId) {
+        return commentRepository.findByMemberId(memberId);
     }
 
-    private void checkCommentExist(List<Comment> comments) {
-        if (comments.isEmpty()) {
-            throw new ExistCommentException();
-        }
+    private Article findArticleByEvent(Long articleId){
+        ArticleFindEvent articleFindEvent = new ArticleFindEvent(articleId);
+        publisher.publishEvent(articleFindEvent);
+        return articleFindEvent.getFuture()
+                .join();
+    }
+    private Member findMemberByEvent(Long memberId) {
+        MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
+        publisher.publishEvent(memberFindEvent);
+        return memberFindEvent.getFuture()
+                .join();
     }
 
     private Comment checkRightAboutComment(Long commentId, Member member) {

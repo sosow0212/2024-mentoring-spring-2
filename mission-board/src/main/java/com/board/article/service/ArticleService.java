@@ -6,7 +6,9 @@ import com.board.article.repository.ArticleRepository;
 import com.board.article.service.exception.ArticleRightException;
 import com.board.article.service.exception.ExistArticleException;
 import com.board.member.domain.Member;
+import com.board.member.service.event.MemberFindEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +19,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ArticleService {
 
+    private final ApplicationEventPublisher publisher;
     private final ArticleRepository articleRepository;
 
-    public Article createArticle(Member member, ArticleRequest articleRequest) {
+    public Article createArticle(Long memberId, ArticleRequest articleRequest) {
+        Member member = findMemberByEvent(memberId);
         Article article = new Article(member, articleRequest.title(), articleRequest.content());
         articleRepository.save(article);
         return article;
@@ -27,9 +31,7 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public List<Article> findAllArticles() {
-        List<Article> articles = articleRepository.findAll();
-        checkArticleExist(articles);
-        return articles;
+        return articleRepository.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -37,23 +39,29 @@ public class ArticleService {
         return articleRepository.findById(articleId).orElseThrow(ExistArticleException::new);
     }
 
-    public Article updateArticle(Long articleId, Member member, ArticleRequest articleRequest) {
+    public Article updateArticle(Long articleId, Long memberId, ArticleRequest articleRequest) {
+        Member member = findMemberByEvent(memberId);
         Article article = checkRightAboutArticle(articleId, member);
-        article.updateTitle(articleRequest.title());
-        article.updateContent(articleRequest.content());
+        article.updateArticle(articleRequest.title(), articleRequest.content());
         return article;
     }
 
-    public Article deleteArticle(Long articleId, Member member) {
+    public Article deleteArticle(Long articleId, Long memberId) {
+        Member member = findMemberByEvent(memberId);
         Article article = checkRightAboutArticle(articleId, member);
         articleRepository.delete(article);
         return article;
     }
 
-    public List<Article> findMemberArticles(Member member) {
-        List<Article> articles = articleRepository.findByMemberId(member.getId());
-        checkArticleExist(articles);
-        return articles;
+    public List<Article> findMemberArticles(Long memberId) {
+        return articleRepository.findByMemberId(memberId);
+    }
+
+    private Member findMemberByEvent(Long memberId) {
+        MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
+        publisher.publishEvent(memberFindEvent);
+        return memberFindEvent.getFuture()
+                .join();
     }
 
     private Article checkRightAboutArticle(Long articleId, Member member) {
@@ -62,11 +70,5 @@ public class ArticleService {
             throw new ArticleRightException();
         }
         return article;
-    }
-
-    private void checkArticleExist(List<Article> articles) {
-        if (articles.isEmpty()) {
-            throw new ExistArticleException();
-        }
     }
 }

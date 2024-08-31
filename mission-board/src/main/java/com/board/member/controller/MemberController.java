@@ -1,9 +1,8 @@
 package com.board.member.controller;
 
-import com.board.login.annotation.Login;
+import com.board.global.annotation.Login;
 import com.board.member.controller.dto.MemberRequest;
 import com.board.member.controller.dto.MemberResponse;
-import com.board.member.domain.Member;
 import com.board.member.mapper.MemberMapper;
 import com.board.member.service.MemberService;
 import lombok.AllArgsConstructor;
@@ -30,22 +29,22 @@ public class MemberController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<MemberResponse> showMember(@Login Member member) {
-        MemberResponse memberResponse = MemberMapper.toMemberResponse(member);
+    public ResponseEntity<MemberResponse> showMember(@Login Long memberId) {
+        MemberResponse memberResponse = MemberMapper.toMemberResponse(memberService.findMember(memberId));
         log.info("{}님 정보 조회하였습니다.", memberResponse.memberNickName());
         return ResponseEntity.ok(memberResponse);
     }
 
     @PatchMapping("/members")
-    public ResponseEntity<MemberResponse> updateMember(@RequestBody MemberRequest memberRequest, @Login Member member) {
-        MemberResponse memberResponse = MemberMapper.toMemberResponse(memberService.updateMember(memberRequest, member));
+    public ResponseEntity<MemberResponse> updateMember(@RequestBody MemberRequest memberRequest, @Login Long memberId) {
+        MemberResponse memberResponse = MemberMapper.toMemberResponse(memberService.updateMember(memberRequest, memberId));
         log.info("{}님의 회원정보가 수정되었습니다.", memberResponse.memberNickName());
         return ResponseEntity.ok(memberResponse);
     }
 
     @DeleteMapping("/members")
-    public ResponseEntity<MemberResponse> deleteMember(@Login Member member) {
-        MemberResponse memberResponse = MemberMapper.toMemberResponse(memberService.deleteMember(member));
+    public ResponseEntity<MemberResponse> deleteMember(@Login Long memberId) {
+        MemberResponse memberResponse = MemberMapper.toMemberResponse(memberService.deleteMember(memberId));
         log.info("{}님 탈퇴하였습니다.", memberResponse.memberNickName());
         return ResponseEntity.ok(memberResponse);
     }

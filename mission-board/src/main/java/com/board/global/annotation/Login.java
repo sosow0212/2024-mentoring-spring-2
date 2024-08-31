@@ -1,4 +1,4 @@
-package com.board.login.annotation;
+package com.board.global.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
