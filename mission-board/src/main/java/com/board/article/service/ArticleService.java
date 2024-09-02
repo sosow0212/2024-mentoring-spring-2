@@ -23,7 +23,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
 
     public Article createArticle(Long memberId, ArticleRequest articleRequest) {
-        Member member = findMemberByEvent(memberId);
+        Member member = foundMemberByEvent(memberId);
         Article article = new Article(member, articleRequest.title(), articleRequest.content());
         articleRepository.save(article);
         return article;
@@ -41,14 +41,14 @@ public class ArticleService {
     }
 
     public Article updateArticle(Long articleId, Long memberId, ArticleRequest articleRequest) {
-        Member member = findMemberByEvent(memberId);
+        Member member = foundMemberByEvent(memberId);
         Article article = checkRightAboutArticle(articleId, member);
         article.updateArticle(articleRequest.title(), articleRequest.content());
         return article;
     }
 
     public Article deleteArticle(Long articleId, Long memberId) {
-        Member member = findMemberByEvent(memberId);
+        Member member = foundMemberByEvent(memberId);
         Article article = checkRightAboutArticle(articleId, member);
         articleRepository.delete(article);
         return article;
@@ -58,7 +58,7 @@ public class ArticleService {
         return articleRepository.findByMemberId(memberId);
     }
 
-    private Member findMemberByEvent(Long memberId) {
+    private Member foundMemberByEvent(Long memberId) {
         MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
         publisher.publishEvent(memberFindEvent);
         return memberFindEvent.getFuture()

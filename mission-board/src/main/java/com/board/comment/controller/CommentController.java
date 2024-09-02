@@ -6,10 +6,8 @@ import com.board.comment.controller.dto.CommentResponses;
 import com.board.comment.mapper.CommentMapper;
 import com.board.comment.service.CommentService;
 import com.board.global.annotation.Login;
-import com.board.member.service.event.MemberFindEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +20,6 @@ import java.net.URI;
 public class CommentController {
 
     private final CommentService commentService;
-    private final ApplicationEventPublisher publisher;
 
     @PostMapping("/articles/{articleId}/comments")
     public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest commentRequest, @PathVariable Long articleId, @Login Long memberId) {

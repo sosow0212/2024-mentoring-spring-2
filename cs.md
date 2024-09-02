@@ -1476,3 +1476,35 @@ public class CookieStorage {
 * ConcurrentHashMap과 같은 스레드에 안전한 자료구조를 사용.
 
 ---
+## EventListener , TransactionEventListener
+
+## EventListener
+* @EventListener는 스프링에서 제공하는 애너테이션으로, 특정 이벤트가 발생했을 때 해당 이벤트를 처리하는 메서드를 정의하는 데 사용.
+* 기본적으로 동기적으로 처리되며, 이벤트 발행자와 동일한 스레드에서 실행.
+
+### 동작 방식
+* 리스너 메서드는 이벤트 발행과 동일한 트랜잭션 컨텍스트에서 실행.
+* 특정 데이터가 변경되었을 때 알림을 보내거나, 로그를 기록하는 등의 작업, 특정 객체를 저장할 때 다른 객체도 저장해야 하는 경우 의존성을 끊기 위해 사용.
+
+## TransactionEventListener
+* @TransactionalEventListener는 트랜잭션과 연관된 이벤트를 처리하는 리스너를 정의하는 데 사용.
+* 이벤트를 트랜잭션의 특정 단계에 바인딩하여 처리할 수 있게 함.
+* 기본적으로 트랜잭션이 성공적으로 커밋된 후에 이벤트를 처리.
+
+### 동작방식 
+* @TransactionalEventListener는 트랜잭션의 단계에 따라 이벤트를 처리합니다. 이 단계는 phase 속성을 통해 설정 가능.
+* BEFORE_COMMIT: 트랜잭션이 커밋되기 직전에 실행.
+* AFTER_COMMIT: 트랜잭션이 성공적으로 커밋된 후에 실행 (기본값).
+* AFTER_ROLLBACK: 트랜잭션이 롤백된 후에 실행.
+* AFTER_COMPLETION: 트랜잭션이 완료된 후 (커밋 또는 롤백) 실행.
+
+### EventListener , TransactionEventListener 차이점
+* 트랜잭션 
+  * EventListener: 트랜잭션과 무관하게 동작
+  * TransactionEventListener: 트랜잭션 단계에 따라 이벤트 처리 가능.
+* 실행 시점
+  * EventListener: 이벤트가 발생한 시점에 즉시 실행
+  * TransactionEventListener: 트랜잭션 커밋 후 실행 (기본값)
+* 스레드
+  * EventListener: 이벤트 발행자와 동일한 스레드에서 동작
+  * TransactionEventListener: 트랜잭션이 완료된 후 별도 스레드에서 실행 가능

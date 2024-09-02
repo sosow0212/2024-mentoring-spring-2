@@ -26,8 +26,8 @@ public class CommentService {
     private final ApplicationEventPublisher publisher;
 
     public Comment createComment(CommentRequest commentRequest, Long memberId, Long articleId) {
-        Article article = findArticleByEvent(articleId);
-        Member member = findMemberByEvent(memberId);
+        Article article = foundArticleByEvent(articleId);
+        Member member = foundMemberByEvent(memberId);
         Comment comment = CommentMapper.toComment(member, article, commentRequest);
         commentRepository.save(comment);
         return comment;
@@ -35,19 +35,19 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<Comment> showAllComments(Long articleId) {
-        Article article = findArticleByEvent(articleId);
+        Article article = foundArticleByEvent(articleId);
         return commentRepository.findByArticleId(article.getId());
     }
 
     public Comment updateComment(CommentRequest commentRequest, Long memberId, Long commentId) {
-        Member member = findMemberByEvent(memberId);
+        Member member = foundMemberByEvent(memberId);
         Comment comment = checkRightAboutComment(commentId, member);
         comment.updateComment(commentRequest.content());
         return comment;
     }
 
     public Comment deleteComment(Long memberId, Long commentId) {
-        Member member = findMemberByEvent(memberId);
+        Member member = foundMemberByEvent(memberId);
         Comment comment = checkRightAboutComment(commentId, member);
         commentRepository.delete(comment);
         return comment;
@@ -57,13 +57,13 @@ public class CommentService {
         return commentRepository.findByMemberId(memberId);
     }
 
-    private Article findArticleByEvent(Long articleId){
+    private Article foundArticleByEvent(Long articleId){
         ArticleFindEvent articleFindEvent = new ArticleFindEvent(articleId);
         publisher.publishEvent(articleFindEvent);
         return articleFindEvent.getFuture()
                 .join();
     }
-    private Member findMemberByEvent(Long memberId) {
+    private Member foundMemberByEvent(Long memberId) {
         MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
         publisher.publishEvent(memberFindEvent);
         return memberFindEvent.getFuture()
