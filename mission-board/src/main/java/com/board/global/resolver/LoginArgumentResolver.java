@@ -1,13 +1,8 @@
 package com.board.global.resolver;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.board.global.annotation.Login;
-import com.board.global.resolver.exception.ExistTokenException;
-import com.board.global.resolver.exception.TokenTimeException;
-import com.board.global.resolver.exception.TokenVerifyException;
-import com.board.login.domain.Jwt;
+import com.board.login.service.exception.ExistTokenException;
+import com.board.login.service.JwtLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -23,7 +18,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final Jwt jwt;
+    private static final String TOKEN_HEADER_NAME = "Authorization";
+
+    private final JwtLoginService jwtLoginService;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -35,18 +32,9 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        String tokenHeader = Optional.ofNullable(request.getHeader("Authorization"))
+        String tokenHeader = Optional.ofNullable(request.getHeader(TOKEN_HEADER_NAME))
                 .orElseThrow(ExistTokenException::new);
         String token = tokenHeader.substring(7);
-        try {
-            DecodedJWT decodedJWT = jwt.verifyJwtToken(token);
-            Long memberId = decodedJWT.getClaim("memberId").asLong();
-            return Optional.of(memberId)
-                    .orElseThrow(ExistTokenException::new);
-        } catch (TokenExpiredException e) {
-            throw new TokenTimeException();
-        } catch (JWTVerificationException e) {
-            throw new TokenVerifyException();
-        }
+        return jwtLoginService.verifyAndExtractJwtToken(token);
     }
 }

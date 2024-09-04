@@ -25,35 +25,35 @@ public class CommentController {
     public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest commentRequest, @PathVariable Long articleId, @Login Long memberId) {
         CommentResponse commentResponse = CommentMapper.toCommentResponse(commentService.createComment(commentRequest, memberId, articleId));
         URI location = URI.create("/api/articles/" + commentResponse.articleId());
-        log.info("{}번 게시물, {}님 댓글 작성 완료. [내용]: {}", commentResponse.articleId(), commentResponse.memberNickName(), commentResponse.content());
+        log.info("{}번 게시물, {}번 유저 댓글 작성 완료. [내용]: {}", commentResponse.articleId(), commentResponse.memberId(), commentResponse.content());
         return ResponseEntity.created(location).build();
     }
 
     @GetMapping("/articles/{articleId}/comments")
     public ResponseEntity<CommentResponses> showAllComments(@PathVariable Long articleId) {
         CommentResponses commentResponses = CommentMapper.toCommentResponses(commentService.showAllComments(articleId));
-        log.info("게시물에 대한 모든 댓글 조회 완료.");
+        log.info("{}번 게시물에 대한 모든 댓글 조회 완료.", articleId);
         return ResponseEntity.ok(commentResponses);
     }
 
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable Long commentId, @Login Long memberId, @RequestBody CommentRequest commentRequest) {
         CommentResponse commentResponse = CommentMapper.toCommentResponse(commentService.updateComment(commentRequest, memberId, commentId));
-        log.info("{}님 댓글 수정 완료. [내용]: {}", commentResponse.memberNickName(), commentResponse.content());
+        log.info("{}번 유저 댓글 수정 완료. [내용]: {}", commentResponse.memberId(), commentResponse.content());
         return ResponseEntity.ok(commentResponse);
     }
 
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> deleteComment(@PathVariable Long commentId, @Login Long memberId) {
         CommentResponse commentResponse = CommentMapper.toCommentResponse(commentService.deleteComment(memberId, commentId));
-        log.info("{}님 댓글 삭제 완료", commentResponse.memberNickName());
+        log.info("{}번 유저 댓글 삭제 완료", commentResponse.memberId());
         return ResponseEntity.ok(commentResponse);
     }
 
     @GetMapping("/members/me/comments")
     public ResponseEntity<CommentResponses> showMemberComments(@Login Long memberId) {
         CommentResponses commentResponses = CommentMapper.toCommentResponses(commentService.showMemberComments(memberId));
-        log.info("모든 댓글을 불러왔습니다.");
+        log.info("{}번 유저의 모든 댓글을 불러왔습니다.", memberId);
         return ResponseEntity.ok(commentResponses);
     }
 }

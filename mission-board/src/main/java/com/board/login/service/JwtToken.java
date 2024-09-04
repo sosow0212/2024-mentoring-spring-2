@@ -1,4 +1,4 @@
-package com.board.login.domain;
+package com.board.login.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -11,17 +11,18 @@ import java.util.Date;
 import java.util.UUID;
 
 @Component
-public class Jwt {
+public class JwtToken implements Token {
 
     private final Algorithm algorithm;
     private final long expirationPeriod;
 
-    public Jwt(@Value("${jwt.secret}") String secretKey, @Value("${jwt.expiration-period}") long expirationPeriod) {
+    public JwtToken(@Value("${jwt.secret}") String secretKey, @Value("${jwt.expiration-period}") long expirationPeriod) {
         this.algorithm = Algorithm.HMAC256(secretKey);
         this.expirationPeriod = expirationPeriod;
     }
 
-    public String createJwtToken(Long memberId) {
+    @Override
+    public String createToken(Long memberId) {
         return JWT.create()
                 .withClaim("memberId", memberId)
                 .withIssuedAt(new Date())
@@ -30,7 +31,8 @@ public class Jwt {
                 .sign(algorithm);
     }
 
-    public DecodedJWT verifyJwtToken(String token) {
+    @Override
+    public DecodedJWT verifyToken(String token) {
         JWTVerifier verifier = JWT.require(algorithm)
                 .build();
         return verifier.verify(token);

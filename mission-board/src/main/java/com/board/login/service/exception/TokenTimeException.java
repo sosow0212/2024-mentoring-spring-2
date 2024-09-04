@@ -1,4 +1,4 @@
-package com.board.global.resolver.exception;
+package com.board.login.service.exception;
 
 import com.board.global.exception.exceptions.CustomErrorCode;
 import com.board.global.exception.exceptions.CustomException;

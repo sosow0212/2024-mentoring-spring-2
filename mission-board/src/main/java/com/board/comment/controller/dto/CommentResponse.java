@@ -1,8 +1,9 @@
 package com.board.comment.controller.dto;
 
 public record CommentResponse(
+        Long id,
         Long articleId,
-        String memberNickName,
+        Long memberId,
         String content
 ) {
 }

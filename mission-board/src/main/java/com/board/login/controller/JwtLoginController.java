@@ -2,7 +2,6 @@ package com.board.login.controller;
 
 import com.board.login.controller.dto.LoginRequest;
 import com.board.login.controller.dto.LoginResponse;
-import com.board.login.domain.Jwt;
 import com.board.login.service.JwtLoginService;
 import com.board.member.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,15 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class JwtLoginController {
 
     private final JwtLoginService jwtLoginService;
-    private final Jwt jwt;
 
     @PostMapping("/members/jwt/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<HttpHeaders> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = MemberMapper.toLoginResponse(jwtLoginService.login(loginRequest));
-        String jwtToken = jwt.createJwtToken(loginResponse.memberId());
+        String jwtToken = jwtLoginService.createJwtToken(loginResponse.memberId());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + jwtToken);
         log.info("{}님 로그인 성공.", loginResponse.memberNickName());
-        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();
+        return ResponseEntity.status(HttpStatus.OK).body(httpHeaders);
     }
 }

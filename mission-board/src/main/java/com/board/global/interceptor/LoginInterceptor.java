@@ -11,9 +11,12 @@ import java.util.Optional;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
+
+    private static final String TOKEN_HEADER_NAME = "Authorization";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String tokenHeader = Optional.ofNullable(request.getHeader("Authorization"))
+        String tokenHeader = Optional.ofNullable(request.getHeader(TOKEN_HEADER_NAME))
                 .orElseThrow(() -> new CustomException(CustomErrorCode.NOT_EXIST_TOKEN));
         return tokenHeader.startsWith("Bearer ");
     }

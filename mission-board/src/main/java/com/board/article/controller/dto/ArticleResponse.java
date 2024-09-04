@@ -2,7 +2,7 @@ package com.board.article.controller.dto;
 
 public record ArticleResponse(
         Long id,
-        String memberNickName,
+        Long memberId,
         String title,
         String content
 ) {

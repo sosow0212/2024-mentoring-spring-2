@@ -1,21 +1,17 @@
 package com.board.comment.service;
 
-import com.board.article.domain.Article;
-import com.board.article.service.event.ArticleFindEvent;
 import com.board.comment.controller.dto.CommentRequest;
 import com.board.comment.domain.Comment;
 import com.board.comment.mapper.CommentMapper;
 import com.board.comment.repository.CommentRepository;
 import com.board.comment.service.exception.CommentRightException;
 import com.board.comment.service.exception.ExistCommentException;
-import com.board.member.domain.Member;
-import com.board.member.service.event.MemberFindEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -23,32 +19,26 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ApplicationEventPublisher publisher;
 
     public Comment createComment(CommentRequest commentRequest, Long memberId, Long articleId) {
-        Article article = foundArticleByEvent(articleId);
-        Member member = foundMemberByEvent(memberId);
-        Comment comment = CommentMapper.toComment(member, article, commentRequest);
+        Comment comment = CommentMapper.toComment(memberId, articleId, commentRequest);
         commentRepository.save(comment);
         return comment;
     }
 
     @Transactional(readOnly = true)
     public List<Comment> showAllComments(Long articleId) {
-        Article article = foundArticleByEvent(articleId);
-        return commentRepository.findByArticleId(article.getId());
+        return commentRepository.findByArticleId(articleId);
     }
 
     public Comment updateComment(CommentRequest commentRequest, Long memberId, Long commentId) {
-        Member member = foundMemberByEvent(memberId);
-        Comment comment = checkRightAboutComment(commentId, member);
+        Comment comment = checkRightAboutComment(commentId, memberId);
         comment.updateComment(commentRequest.content());
         return comment;
     }
 
     public Comment deleteComment(Long memberId, Long commentId) {
-        Member member = foundMemberByEvent(memberId);
-        Comment comment = checkRightAboutComment(commentId, member);
+        Comment comment = checkRightAboutComment(commentId, memberId);
         commentRepository.delete(comment);
         return comment;
     }
@@ -57,22 +47,10 @@ public class CommentService {
         return commentRepository.findByMemberId(memberId);
     }
 
-    private Article foundArticleByEvent(Long articleId){
-        ArticleFindEvent articleFindEvent = new ArticleFindEvent(articleId);
-        publisher.publishEvent(articleFindEvent);
-        return articleFindEvent.getFuture()
-                .join();
-    }
-    private Member foundMemberByEvent(Long memberId) {
-        MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
-        publisher.publishEvent(memberFindEvent);
-        return memberFindEvent.getFuture()
-                .join();
-    }
-
-    private Comment checkRightAboutComment(Long commentId, Member member) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(ExistCommentException::new);
-        if (!member.isSameMember(comment.getMember().getId())) {
+    private Comment checkRightAboutComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(ExistCommentException::new);
+        if (!Objects.equals(comment.getMemberId(), memberId)) {
             throw new CommentRightException();
         }
         return comment;

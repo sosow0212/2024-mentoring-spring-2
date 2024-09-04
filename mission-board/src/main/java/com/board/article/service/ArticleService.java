@@ -5,26 +5,22 @@ import com.board.article.domain.Article;
 import com.board.article.repository.ArticleRepository;
 import com.board.article.service.exception.ArticleRightException;
 import com.board.article.service.exception.ExistArticleException;
-import com.board.member.domain.Member;
-import com.board.member.service.event.MemberFindEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ArticleService {
 
-    private final ApplicationEventPublisher publisher;
     private final ArticleRepository articleRepository;
 
     public Article createArticle(Long memberId, ArticleRequest articleRequest) {
-        Member member = foundMemberByEvent(memberId);
-        Article article = new Article(member, articleRequest.title(), articleRequest.content());
+        Article article = new Article(memberId, articleRequest.title(), articleRequest.content());
         articleRepository.save(article);
         return article;
     }
@@ -41,15 +37,13 @@ public class ArticleService {
     }
 
     public Article updateArticle(Long articleId, Long memberId, ArticleRequest articleRequest) {
-        Member member = foundMemberByEvent(memberId);
-        Article article = checkRightAboutArticle(articleId, member);
+        Article article = checkRightAboutArticle(articleId, memberId);
         article.updateArticle(articleRequest.title(), articleRequest.content());
         return article;
     }
 
     public Article deleteArticle(Long articleId, Long memberId) {
-        Member member = foundMemberByEvent(memberId);
-        Article article = checkRightAboutArticle(articleId, member);
+        Article article = checkRightAboutArticle(articleId, memberId);
         articleRepository.delete(article);
         return article;
     }
@@ -58,16 +52,9 @@ public class ArticleService {
         return articleRepository.findByMemberId(memberId);
     }
 
-    private Member foundMemberByEvent(Long memberId) {
-        MemberFindEvent memberFindEvent = new MemberFindEvent(memberId);
-        publisher.publishEvent(memberFindEvent);
-        return memberFindEvent.getFuture()
-                .join();
-    }
-
-    private Article checkRightAboutArticle(Long articleId, Member member) {
+    private Article checkRightAboutArticle(Long articleId, Long memberId) {
         Article article = findArticle(articleId);
-        if (!member.isSameMember(article.getMember().getId())) {
+        if (!Objects.equals(article.getMemberId(), memberId)) {
             throw new ArticleRightException();
         }
         return article;
