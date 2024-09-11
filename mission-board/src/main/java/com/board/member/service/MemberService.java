@@ -5,7 +5,7 @@ import com.board.member.domain.Member;
 import com.board.member.mapper.MemberMapper;
 import com.board.member.repository.MemberRepository;
 import com.board.member.service.exception.ExistMemberException;
-import com.board.member.service.exception.ExistMemberIdException;
+import com.board.member.service.exception.ExistMemberLoginIdException;
 import com.board.member.service.exception.ExistMemberNickNameException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class MemberService {
 
     private void checkDuplicateMemberLoginId(String memberId) {
         if (memberRepository.existsByMemberLoginId(memberId)) {
-            throw new ExistMemberIdException();
+            throw new ExistMemberLoginIdException();
         }
     }
 
