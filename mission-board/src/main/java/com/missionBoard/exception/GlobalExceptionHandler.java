@@ -15,20 +15,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundBoardException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundBoardException(NotFoundBoardException ex){
-        ErrorResponse errorResponse= new ErrorResponse(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleNotFoundBoardException(NotFoundBoardException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedActionException(UnauthorizedActionException ex){
-        ErrorResponse errorResponse= new ErrorResponse(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleUnauthorizedActionException(UnauthorizedActionException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @ExceptionHandler(BadJoinRequestException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedActionException(BadJoinRequestException ex){
-        ErrorResponse errorResponse= new ErrorResponse(ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleUnauthorizedActionException(BadJoinRequestException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidJwtTokenException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedActionException(InvalidJwtTokenException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
