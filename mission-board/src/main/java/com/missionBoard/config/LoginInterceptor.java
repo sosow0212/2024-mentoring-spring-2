@@ -10,11 +10,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.Optional;
 
 @Component
-public class Interceptor implements HandlerInterceptor {
+public class LoginInterceptor implements HandlerInterceptor {
 
     private final MemberService memberService;
 
-    public Interceptor(MemberService memberService) {
+    public LoginInterceptor(MemberService memberService) {
         this.memberService = memberService;
     }
 
