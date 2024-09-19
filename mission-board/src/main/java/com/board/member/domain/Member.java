@@ -53,8 +53,4 @@ public class Member {
             throw new ExistMemberPasswordException();
         }
     }
-
-    public boolean isSameMember(Long boardObjectId) {
-        return Objects.equals(id, boardObjectId);
-    }
 }
