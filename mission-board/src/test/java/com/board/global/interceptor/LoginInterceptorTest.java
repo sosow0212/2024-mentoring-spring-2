@@ -1,7 +1,6 @@
-package com.board.login;
+package com.board.global.interceptor;
 
 import com.board.global.exception.exceptions.CustomException;
-import com.board.global.interceptor.LoginInterceptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ public class LoginInterceptorTest {
 
     @DisplayName("토큰이 존재하지 않을 경우.")
     @Test
-    void preHandle_not_exist_token() throws Exception {
+    void preHandle_not_exist_token() {
         //given
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
