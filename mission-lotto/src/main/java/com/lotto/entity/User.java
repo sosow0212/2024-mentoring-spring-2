@@ -35,6 +35,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserLotto> userLotto = new ArrayList<>();
 
+    private static final int TICKET_PRICE = 1000;
+
     public void addUserLotto(UserLotto userLotto) {
         if (this.userLotto == null) {
             this.userLotto = new ArrayList<>();
@@ -44,7 +46,7 @@ public class User {
     }
 
     public void validateMoney(int ticketCount) {
-        int price = ticketCount * 1000;
+        int price = ticketCount * TICKET_PRICE;
         if (this.money < price) {
             throw new InsufficientFundsException();
         }
