@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation 'com.auth0:java-jwt:4.2.1'
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
 }
 
 test {

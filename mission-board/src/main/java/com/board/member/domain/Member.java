@@ -40,6 +40,14 @@ public class Member {
         this.memberPassword = memberPassword;
     }
 
+    public Member(Long id, String memberName, String memberNickName, String memberLoginId, String memberPassword) {
+        this.id = id;
+        this.memberName = memberName;
+        this.memberNickName = memberNickName;
+        this.memberLoginId = memberLoginId;
+        this.memberPassword = memberPassword;
+    }
+
     public void updateMember(Long id, String memberName, String memberNickName, String memberLoginId, String memberPassword) {
         this.id = id;
         this.memberName = memberName;
