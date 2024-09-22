@@ -3,6 +3,7 @@ package com.board.member.domain;
 import com.board.member.domain.exception.ExistMemberPasswordException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Member {
 
     @Id
@@ -34,14 +36,6 @@ public class Member {
     private String memberPassword;
 
     public Member(String memberName, String memberNickName, String memberLoginId, String memberPassword) {
-        this.memberName = memberName;
-        this.memberNickName = memberNickName;
-        this.memberLoginId = memberLoginId;
-        this.memberPassword = memberPassword;
-    }
-
-    public Member(Long id, String memberName, String memberNickName, String memberLoginId, String memberPassword) {
-        this.id = id;
         this.memberName = memberName;
         this.memberNickName = memberNickName;
         this.memberLoginId = memberLoginId;

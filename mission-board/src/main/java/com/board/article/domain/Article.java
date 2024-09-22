@@ -1,12 +1,14 @@
 package com.board.article.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@AllArgsConstructor
 public class Article {
 
     @Id
