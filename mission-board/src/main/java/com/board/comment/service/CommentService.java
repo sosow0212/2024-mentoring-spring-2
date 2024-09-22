@@ -27,7 +27,7 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Comment> showAllComments(Long articleId) {
+    public List<Comment> showArticleComments(Long articleId) {
         return commentRepository.findByArticleId(articleId);
     }
 

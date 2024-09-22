@@ -5,7 +5,6 @@ import com.board.article.domain.Article;
 import com.board.article.service.ArticleService;
 import com.board.global.resolver.LoginArgumentResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.util.logging.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ArticleController.class)
-@Slf4j
 public class ArticleControllerTest {
 
     @Autowired

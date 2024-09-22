@@ -31,7 +31,7 @@ public class CommentController {
 
     @GetMapping("/articles/{articleId}/comments")
     public ResponseEntity<CommentResponses> showAllComments(@PathVariable Long articleId) {
-        CommentResponses commentResponses = CommentMapper.toCommentResponses(commentService.showAllComments(articleId));
+        CommentResponses commentResponses = CommentMapper.toCommentResponses(commentService.showArticleComments(articleId));
         log.info("{}번 게시물에 대한 모든 댓글 조회 완료.", articleId);
         return ResponseEntity.ok(commentResponses);
     }

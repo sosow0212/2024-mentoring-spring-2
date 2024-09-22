@@ -61,7 +61,7 @@ public class CommentServiceTest {
         when(commentRepository.findByArticleId(anyLong())).thenReturn(List.of(comment));
 
         //when
-        List<Comment> result = commentService.showAllComments(1L);
+        List<Comment> result = commentService.showArticleComments(1L);
 
         //then
         assertEquals(1, result.size());
