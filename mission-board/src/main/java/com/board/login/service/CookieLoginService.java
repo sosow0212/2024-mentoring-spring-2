@@ -24,7 +24,8 @@ public class CookieLoginService implements LoginService {
     @Transactional(readOnly = true)
     @Override
     public Member login(LoginRequest loginRequest) {
-        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId()).orElseThrow(ExistMemberLoginIdException::new);
+        Member member = memberRepository.findByMemberLoginId(loginRequest.memberLoginId())
+                .orElseThrow(ExistMemberLoginIdException::new);
         member.checkPassword(loginRequest.memberPassword());
         return member;
     }
@@ -33,7 +34,8 @@ public class CookieLoginService implements LoginService {
     public Member findMemberByCookie(HttpServletRequest request) {
         String memberId = readCookie(request).orElseThrow(ExistCookieException::new);
         Long realMemberId = Long.valueOf(memberId);
-        return memberRepository.findById(realMemberId).orElseThrow(ExistMemberException::new);
+        return memberRepository.findById(realMemberId)
+                .orElseThrow(ExistMemberException::new);
     }
 
     private Optional<String> readCookie(HttpServletRequest request) {

@@ -3,9 +3,9 @@ package com.board.member.service.exception;
 import com.board.global.exception.exceptions.CustomErrorCode;
 import com.board.global.exception.exceptions.CustomException;
 
-public class ExistMemberIdException extends CustomException {
+public class ExistMemberException extends CustomException {
 
-    public ExistMemberIdException() {
-        super(CustomErrorCode.ALREADY_EXIST_MEMBER_ID);
+    public ExistMemberException() {
+        super(CustomErrorCode.NOT_EXIST_MEMBER);
     }
 }

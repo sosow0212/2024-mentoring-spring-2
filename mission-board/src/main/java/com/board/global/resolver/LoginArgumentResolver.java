@@ -1,12 +1,9 @@
-package com.board.login.resolver;
+package com.board.global.resolver;
 
-import com.board.global.exception.exceptions.CustomErrorCode;
-import com.board.global.exception.exceptions.CustomException;
-import com.board.login.annotation.Login;
-import com.board.login.service.SessionLoginService;
-import com.board.member.domain.Member;
+import com.board.global.annotation.Login;
+import com.board.login.service.exception.ExistTokenException;
+import com.board.login.service.JwtLoginService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -21,20 +18,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final SessionLoginService sessionLoginService;
+    private static final String TOKEN_HEADER_NAME = "Authorization";
+
+    private final JwtLoginService jwtLoginService;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean isLoginAnnotation = parameter.hasParameterAnnotation(Login.class);
-        boolean isMemberType = Member.class.isAssignableFrom(parameter.getParameterType());
-        return isLoginAnnotation && isMemberType;
+        boolean isMemberIdType = Long.class.isAssignableFrom(parameter.getParameterType());
+        return isLoginAnnotation && isMemberIdType;
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        HttpSession session = Optional.ofNullable(request.getSession(false))
-                .orElseThrow(() -> new CustomException(CustomErrorCode.NOT_EXIST_SESSION));
-        return sessionLoginService.findMemberBySession(session);
+        String tokenHeader = Optional.ofNullable(request.getHeader(TOKEN_HEADER_NAME))
+                .orElseThrow(ExistTokenException::new);
+        String token = tokenHeader.substring(7);
+        return jwtLoginService.verifyAndExtractJwtToken(token);
     }
 }

@@ -3,6 +3,7 @@ package com.board.member.domain;
 import com.board.member.domain.exception.ExistMemberPasswordException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Member {
 
     @Id
@@ -52,13 +54,5 @@ public class Member {
         if (!Objects.equals(memberPassword, requestPassword)) {
             throw new ExistMemberPasswordException();
         }
-    }
-
-    public boolean isMemberArticle(Long articleMemberId) {
-        return Objects.equals(id, articleMemberId);
-    }
-
-    public boolean isMemberComment(Long commentMemberId) {
-        return Objects.equals(id, commentMemberId);
     }
 }

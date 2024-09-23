@@ -5,8 +5,7 @@ import com.board.article.controller.dto.ArticleResponse;
 import com.board.article.controller.dto.ArticleResponses;
 import com.board.article.mapper.ArticleMapper;
 import com.board.article.service.ArticleService;
-import com.board.login.annotation.Login;
-import com.board.member.domain.Member;
+import com.board.global.annotation.Login;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +22,10 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping("/articles")
-    public ResponseEntity<Void> createArticle(@RequestBody ArticleRequest articleRequest, @Login Member member) {
-        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.createArticle(member, articleRequest));
+    public ResponseEntity<Void> createArticle(@RequestBody ArticleRequest articleRequest, @Login Long memberId) {
+        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.createArticle(memberId, articleRequest));
         URI location = URI.create("/api/articles/" + articleResponse.id());
-        log.info("{}님 '{}'글 작성 완료", articleResponse.memberNickName(), articleResponse.title());
+        log.info("{}번 유저, '{}'글 작성 완료", articleResponse.memberId(), articleResponse.title());
         return ResponseEntity.created(location).build();
     }
 
@@ -45,23 +44,23 @@ public class ArticleController {
     }
 
     @PatchMapping("/articles/{articleId}")
-    public ResponseEntity<ArticleResponse> updateArticle(@PathVariable Long articleId, @Login Member member, @RequestBody ArticleRequest articleRequest) {
-        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.updateArticle(articleId, member, articleRequest));
-        log.info("{}님 게시물을 수정했습니다.", articleResponse.memberNickName());
+    public ResponseEntity<ArticleResponse> updateArticle(@PathVariable Long articleId, @Login Long memberId, @RequestBody ArticleRequest articleRequest) {
+        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.updateArticle(articleId, memberId, articleRequest));
+        log.info("{}번 유저, 게시물을 수정했습니다.", articleResponse.memberId());
         return ResponseEntity.ok(articleResponse);
     }
 
     @DeleteMapping("/articles/{articleId}")
-    public ResponseEntity<ArticleResponse> deleteArticle(@PathVariable Long articleId, @Login Member member) {
-        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.deleteArticle(articleId, member));
-        log.info("{}님의 게시물이 삭제되었습니다.", articleResponse.memberNickName());
+    public ResponseEntity<ArticleResponse> deleteArticle(@PathVariable Long articleId, @Login Long memberId) {
+        ArticleResponse articleResponse = ArticleMapper.toArticleResponse(articleService.deleteArticle(articleId, memberId));
+        log.info("{}유저의 게시물이 삭제되었습니다.", articleResponse.memberId());
         return ResponseEntity.ok(articleResponse);
     }
 
-    @GetMapping("/members/articles")
-    public ResponseEntity<ArticleResponses> showMemberArticles(@Login Member member){
-        ArticleResponses articleResponses = ArticleMapper.toArticleResponses(articleService.findMemberArticles(member));
-        log.info("{}님의 모든 게시물을 불러왔습니다.", member.getMemberNickName());
+    @GetMapping("/members/me/articles")
+    public ResponseEntity<ArticleResponses> showMemberArticles(@Login Long memberId) {
+        ArticleResponses articleResponses = ArticleMapper.toArticleResponses(articleService.findMemberArticles(memberId));
+        log.info("{}번 유저의 모든 게시물을 불러왔습니다.", memberId);
         return ResponseEntity.ok(articleResponses);
     }
 }

@@ -1,23 +1,21 @@
 package com.board.comment.mapper;
 
-import com.board.article.domain.Article;
 import com.board.comment.controller.dto.CommentRequest;
 import com.board.comment.controller.dto.CommentResponse;
 import com.board.comment.controller.dto.CommentResponses;
 import com.board.comment.domain.Comment;
-import com.board.member.domain.Member;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CommentMapper {
 
-    public static Comment toComment(Member member, Article article, CommentRequest commentRequest) {
-        return new Comment(member, article, commentRequest.content());
+    public static Comment toComment(Long memberId, Long articleId, CommentRequest commentRequest) {
+        return new Comment(memberId, articleId, commentRequest.content());
     }
 
     public static CommentResponse toCommentResponse(Comment comment) {
-        return new CommentResponse(comment.getArticle().getId(), comment.getMember().getMemberNickName(), comment.getContent());
+        return new CommentResponse(comment.getId(), comment.getArticleId(), comment.getMemberId(), comment.getContent());
     }
 
     public static CommentResponses toCommentResponses(List<Comment> comments) {

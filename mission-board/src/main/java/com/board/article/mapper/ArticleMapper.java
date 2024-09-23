@@ -10,7 +10,7 @@ import java.util.List;
 public class ArticleMapper {
 
     public static ArticleResponse toArticleResponse(Article article) {
-        return new ArticleResponse(article.getId(), article.getMember().getMemberNickName(), article.getTitle(), article.getContent());
+        return new ArticleResponse(article.getId(), article.getMemberId(), article.getTitle(), article.getContent());
     }
 
     public static ArticleResponses toArticleResponses(List<Article> articles) {
